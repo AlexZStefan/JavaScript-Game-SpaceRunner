@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width">
+	<title>SignUp</title>
+	<link href="./static/style.css" rel="stylesheet" type="text/css" />
+
+	<h1>SignUp Page</h1>
+	
+</head>
+
+<body>
+
+	<form action = "/signUp" method="post">
+		<table class = "form" border="1">
+			<tr>
+			  <td>
+			  <label class = "label">Username</label></td>
+			<td><input type = "text" name = "username" autofocus placeholder="your username" min="5" max = "10"></td>
+			</tr>
+			<tr>
+			  <td>
+			  <label class = "label">Password</label></td>
+			<td><input type = "text" name = "password" placeholder="your password"></td>
+			</tr>
+		  </table> 
+		</br>      
+			   <input type = "submit" name = "save" value = "SignUp" href = "/">
+			   <button><a href = "/">Return</a></button>         
+	  </form>
+
+</body>
+
+</html>

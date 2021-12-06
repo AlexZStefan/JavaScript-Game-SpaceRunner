@@ -1,0 +1,135 @@
+.form{
+  background-color: rgb(135, 195, 251);
+}
+
+.index_Page{
+  background-color: rgb(135, 195, 251);
+}
+
+.index_menu{
+  text-align: center;
+  background-color: rgb(135, 195, 251);
+}
+
+.index_game{
+  background-image: image("/static/resources/textures/gameImage.jpg");
+}
+
+.grid-game-container{
+  position: absolute;
+  margin-top: 0px;
+}
+
+.splash{
+  position: fixed;
+  top:0;
+  left: 0;
+  width: 100%;
+  height: 100vh;
+  background-color: black;
+  z-index: 100;
+  color: white;
+  text-align: center;
+  line-height: 90vh;
+}
+
+.splash.display-none{
+  position: fixed;
+  opacity: 0;
+  z-index: -10;
+  top:0;
+  left: 0;
+  width: 0px;
+  height: 0px;
+  background-color: black;
+  color: white;
+  text-align: center;
+  line-height: 90vh;
+  transition: all 0.5s;
+}
+
+@keyframes fadeIn{
+  to{
+    opacity: 1;
+  }
+}
+
+.fade-in{
+  opacity: 0;
+  animation: fadeIn 1s ease-in forwards;  /* forwards retains the last keyframe - set text to opacity of 1; */ 
+}
+
+.GameMenu{
+  position: absolute;
+  z-index: 110;
+  top: 115px;
+
+  margin-left: 40%; 
+
+  opacity: 0;
+  background-color: rgba(0, 174, 255, 0.822);
+  display: grid;
+  width: 25%;
+  grid-gap: 0px;  
+  padding: 0px;
+}
+
+.GameMenu-menu {
+  text-align: center;
+  padding: 10px;
+  font-size: 20px;
+     z-index: 15;
+}
+
+.menu1 {
+  grid-column: 1 / span 1;
+  grid-row: 1;
+}
+
+.menu2 {
+  grid-column:  1;
+
+  grid-row: 2;
+}
+
+.menu3 {
+  grid-column: 1;
+  grid-row: 3;
+}
+
+.index_Page{
+  background-color: #2196F3;
+}
+
+.grid-container {
+  position: absolute;
+  display: grid;
+  z-index: 2;
+  top: 0px;
+  width: 100%;
+  grid-gap: 0px;
+  opacity: 0.8;
+  padding: 0px;
+}
+
+.grid-item {
+  background-color: rgba(0, 174, 255, 0.822);
+  text-align: center;
+  padding: 10px;
+  font-size: 20px;
+}
+
+.item1 {
+  grid-column: 1 / span 1;
+  grid-row: 1;
+}
+
+.item2 {
+  grid-column: 2 / span 1;
+  grid-row: 1;
+}
+
+.item3 {
+  grid-column: 3 / span 1;
+  grid-row: 1;
+}
