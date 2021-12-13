@@ -10,7 +10,7 @@ let addEnemies, instantiateEnemies, createEnemyPool, enemySpawner, allEnemies;
 // function will be deleted 
 export default instantiateEnemies = (player, array) => {
   let enemy = createCube(1, 1, 1, 0xfe1100);
-  console.log(enemy)
+
   array.push(enemy);
 }
 

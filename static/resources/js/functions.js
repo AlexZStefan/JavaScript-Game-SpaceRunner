@@ -70,7 +70,7 @@ onCollision = (p1, p2) => {
       p2.visible = false;
 
     }
-    else console.log("noCollision");
+    
   }
 };
 

@@ -10,11 +10,8 @@ import gameLights, { Player, createCube, gameObjects, skyCube, createTerrainPlan
 
 import { addEnemies, enemySpawner, createEnemyPool } from "./createEnemy.js";
 import { Queue, /*generateTerrain*/ onCollision } from "./functions.js";
-import { Group } from "https://unpkg.com/three@0.133.1/build/three.module.js";
 
 import { addListener } from "./audioManager.js";
-
-//import signIn from "./logging.js";
 
 // declare variables 
 let gameScene, gameCamera, gameRenderer, myPlayer, myEvent,
@@ -124,6 +121,8 @@ document.addEventListener('DOMContentLoaded', (e) => {
       if (gameRunning) {
         // hide the menu 
         menu.style.opacity = 0;
+
+        console.log(myPlayer.children);
 
         // set the player score 
 

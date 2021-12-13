@@ -1,15 +1,24 @@
-import { DirectionalLight, DirectionalLightHelper, AmbientLight, BoxGeometry, ConeGeometry, CylinderGeometry, PlaneGeometry,/* side of geometry*/ DoubleSide, BackSide, FrontSide, Mesh, MeshBasicMaterial, MeshStandardMaterial, MeshPhongMaterial, Group, Quaternion, Vector3, Euler, Object3D, TextureLoader, UVMapping, RepeatWrapping, AdditiveBlending, CustomBlending, AddEquation, OneFactor, ZeroFactor, SubtractEquation } from "https://unpkg.com/three@0.133.1/build/three.module.js"
+import { DirectionalLight, DirectionalLightHelper, AmbientLight, BoxGeometry, ConeGeometry,
+   CylinderGeometry, PlaneGeometry,/* side of geometry*/ DoubleSide, BackSide, FrontSide, Mesh,
+    MeshBasicMaterial, MeshStandardMaterial, MeshPhongMaterial, Group, Quaternion, Vector3, 
+    Euler, Object3D, TextureLoader, UVMapping, RepeatWrapping, AdditiveBlending, CustomBlending,
+     AddEquation, OneFactor, ZeroFactor, SubtractEquation } 
+     from "https://unpkg.com/three@0.133.1/build/three.module.js"
 
 import { Queue } from "./functions.js"
 
+import {ModelManager} from "./modelLoader.js"
+
 // variables
-let Player, skyCube, allMaterials, gameLights, loader, createCube, createCone, createPlane, gameObjects, terrainQueue;
+let Player, skyCube, allMaterials, gameLights, loader, createCube, createCone, createPlane, 
+gameObjects, playerModel;
 
 //functions
-let jump, createCylinder;
+let createCylinder;
 
 // create the game background 
 loader = new TextureLoader();
+
 
 skyCube = (scene) => {
   loader.load("./resources/textures/skyArt.jpg", (texture) => {
@@ -136,7 +145,7 @@ let generateTerrain = (scene, player, queueIn, queueOut) => {
   queueOut.allElements().forEach((element) => {
     if (element.position.z < player.position.z - 5) {
       element.position.z += 30;
-      console.log("q i " + element.position.z);
+  
     }
   }
   );
@@ -156,10 +165,14 @@ Player = (widthX, heightY, depthZ, playerColor) => {
     emissive: 0x0,
   });
 
+  playerModel = new ModelManager(myPlayer, 0.01,0.01,0.01);
+  playerModel.loadModels("/resources/3dModels/wraith.glb", "Player");
+
+
   myPlayer.speed = 0.8;
   myPlayer.lives = 3;
   myPlayer.castShadow = true;
-  myPlayer.attach(new Mesh(geometry, material));
+  //myPlayer.attach(new Mesh(geometry, material));
   myPlayer.name = "Player";
   myPlayer.visible = true;
   myPlayer.position.y = 0.5;
