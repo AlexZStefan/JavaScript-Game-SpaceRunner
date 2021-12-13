@@ -6,7 +6,7 @@ import { init } from "./init.js";
 /*{animationBool}*/
 import playerControlls, { renderFrame } from "./playerInput.js";
 
-import gameLights, { Player, createCube, gameObjects, skyCube, createTerrainPlane, generateTerrain } from "./gameObjects.js";
+import gameLights, {TerrainGen, Player, createCube, gameObjects, skyCube } from "./gameObjects.js";
 
 import { addEnemies, enemySpawner, createEnemyPool } from "./createEnemy.js";
 import { Queue, /*generateTerrain*/ onCollision } from "./functions.js";
@@ -17,7 +17,7 @@ import { addListener } from "./audioManager.js";
 let gameScene, gameCamera, gameRenderer, myPlayer, myEvent,
   setGameOver, alertMe, allEnemies, score, playerScore, enemyPool,
   enemy, playerLives, playerHighScore, gameOver, menu, highscore,
-  gameRunning, startButton, worldMap;
+  gameRunning, startButton, gameTerrain;
 
 // declare functions
 let initializer, animate, animationFrame;
@@ -35,9 +35,9 @@ gameCamera = initializer[2];
 let terrainQueue = new Queue();
 
 // CREATE PLAYER
-myPlayer = Player(1, 1, 1, 0x002600);
-myPlayer.score = 0;
-myPlayer.highscore = 0;
+myPlayer = new Player(gameScene);
+myPlayer.addToScene();
+
 // HANDLES PLAYER INPUT
 playerControlls(myPlayer);
 
@@ -67,10 +67,6 @@ skyCube(gameScene);
 const importedGameObjects = gameObjects(gameScene);
 const lights = gameLights(gameScene);
 
-gameScene.add(myPlayer);
-
-let test = addEnemies(gameScene, gameCamera);
-
 addListener(gameScene);
 
 // set the game to pause or unpaused
@@ -87,12 +83,10 @@ let setGameRunning = () => {
   
 }
 
-// Terrain generation 
-let terrainPlanesQueue = new Queue();
-let terrainPlanesQueueOut = new Queue();
-createTerrainPlane(gameScene, myPlayer, terrainPlanesQueue);
+gameTerrain = new TerrainGen(gameScene, myPlayer); 
+gameTerrain.createTerrainPlane();
 
-
+//createTerrainPlane(gameScene, myPlayer, terrainPlanesQueue);
 
 // trigger event when dom is loaded and set the splash screen opacity to 0 and starts the game 
 document.addEventListener('DOMContentLoaded', (e) => {
@@ -122,7 +116,7 @@ document.addEventListener('DOMContentLoaded', (e) => {
         // hide the menu 
         menu.style.opacity = 0;
 
-        console.log(myPlayer.children);
+        console.log(myPlayer);
 
         // set the player score 
 
@@ -135,11 +129,11 @@ document.addEventListener('DOMContentLoaded', (e) => {
 
         // increase speed overtime 
         if (myPlayer.score < 1200) myPlayer.speed += 0.001;
-        console.log("myPlayer" + myPlayer.speed);
+       
 
         // pushes player forward 
-        myPlayer.position.z += myPlayer.speed / 5;
-
+        myPlayer.moveForward();
+    
         //gravity
 
         // set camera position so that it matches the player 
@@ -148,7 +142,8 @@ document.addEventListener('DOMContentLoaded', (e) => {
         gameCamera.position.y = myPlayer.position.y + 2;
 
         // create terrain chunk function in gameObjects
-        generateTerrain(gameScene, myPlayer, terrainPlanesQueue, terrainPlanesQueueOut);
+        gameTerrain.generateTerrain();
+        //generateTerrain(gameScene, myPlayer, terrainPlanesQueue, terrainPlanesQueueOut);
 
         cube2.rotateX(5);
         cube1.rotateX(-5);
@@ -168,7 +163,7 @@ document.addEventListener('DOMContentLoaded', (e) => {
     }
       , 1000 / 60); // frame limit 
 
-    console.log(myPlayer.position.z);
+
   })(); // animate func 
 
   // renders the game after everything was loaded 

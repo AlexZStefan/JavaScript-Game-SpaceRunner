@@ -14,15 +14,7 @@ export default instantiateEnemies = (player, array) => {
   array.push(enemy);
 }
 
-// function will be deleted 
-addEnemies = (player, scene) => {
-  allEnemies = [];
-  //instantiateEnemies(player, allEnemies);
-  allEnemies.forEach(element => {
-    scene.add(element);
-  });
-  return allEnemies;
-}
+
 
 // Enemy Queue Pool - however can be used for collectables
 createEnemyPool = (type) => {

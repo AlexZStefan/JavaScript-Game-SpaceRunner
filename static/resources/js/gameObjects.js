@@ -1,70 +1,65 @@
-import { DirectionalLight, DirectionalLightHelper, AmbientLight, BoxGeometry, ConeGeometry,
-   CylinderGeometry, PlaneGeometry,/* side of geometry*/ DoubleSide, BackSide, FrontSide, Mesh,
-    MeshBasicMaterial, MeshStandardMaterial, MeshPhongMaterial, Group, Quaternion, Vector3, 
-    Euler, Object3D, TextureLoader, UVMapping, RepeatWrapping, AdditiveBlending, CustomBlending,
-     AddEquation, OneFactor, ZeroFactor, SubtractEquation } 
-     from "https://unpkg.com/three@0.133.1/build/three.module.js"
+import {
+  DirectionalLight, DirectionalLightHelper, AmbientLight, BoxGeometry, ConeGeometry,
+  CylinderGeometry, PlaneGeometry,/* side of geometry*/ DoubleSide, BackSide, FrontSide, Mesh,
+  MeshBasicMaterial, MeshStandardMaterial, MeshPhongMaterial, Group, Quaternion, Vector3,
+  Euler, Object3D, TextureLoader, UVMapping, RepeatWrapping, AdditiveBlending, CustomBlending,
+  AddEquation, OneFactor, ZeroFactor, SubtractEquation
+}
+  from "https://unpkg.com/three@0.133.1/build/three.module.js"
 
 import { Queue } from "./functions.js"
 
-import {ModelManager} from "./modelLoader.js"
+import { ModelManager } from "./modelLoader.js"
 
-// variables
-let Player, skyCube, allMaterials, gameLights, loader, createCube, createCone, createPlane, 
-gameObjects, playerModel;
+// functions
+let skyCube, allMaterials, gameLights, createCube, createCone, createPlane,
+  gameObjects, createCylinder;
 
-//functions
-let createCylinder;
+//variables
 
 // create the game background 
-loader = new TextureLoader();
-
+const textureLoader = new TextureLoader();
 
 skyCube = (scene) => {
-  loader.load("./resources/textures/skyArt.jpg", (texture) => {
+  textureLoader.load("./resources/textures/skyArt.jpg", (texture) => {
     scene.background = texture;
   })
 }
 
-// not used yet
 allMaterials = {
   basicYellow: new MeshBasicMaterial({ color: 0xffff00, side: DoubleSide }),
   phongMat: new MeshPhongMaterial(),
-  basicCoin: new MeshBasicMaterial(0xffffff)  
+  basicCoin: new MeshBasicMaterial(0xffffff)
 }
 
 //create allLights
 export default gameLights = (scene) => {
   let allLights = [];
   let dirLight = new DirectionalLight(0xfadede, 50);
+  const helper = new DirectionalLightHelper(dirLight, 5);
   dirLight.position.y = 5;
   dirLight.castShadow = true;
   allLights.push(dirLight);
+  allLights.push(helper);
   allLights.forEach(element => scene.add(element));
 };
 
 createCube = (widthX, heightY, depthZ, cubeColor) => {
   let cube = new Object3D();
-
   const geometry = new BoxGeometry(widthX, heightY, depthZ);
 
-  // green 0x00ff00
   const material = new MeshPhongMaterial({ color: cubeColor });
-
   cube.attach(new Mesh(geometry, material));
-
   cube.name = "Cube"
-
   return cube;
 }
 
 createCylinder = (radiusTop, radiusBottom, height, radialSegments, heightSegments) => {
   const cylinder = new Object3D();
-
   const geometry = new CylinderGeometry(radiusTop, radiusBottom, height, radialSegments, heightSegments);
   ;
   cylinder.attach(new Mesh(geometry, allMaterials.basicCoin));
-  cylinder.applyQuaternion(quaternion);
+  cylinder.rotateX(1.62);
   return cylinder;
 }
 
@@ -87,7 +82,6 @@ createCone = (radius, height, segments, coneColor, arr) => {
 
 createPlane = (widthX, heightY, color, arr) => {
   const geometry = new PlaneGeometry(widthX, heightY);
-
   const plane = new Mesh(geometry, allMaterials.basicYellow);
 
   plane.name = "Plane";
@@ -98,123 +92,135 @@ createPlane = (widthX, heightY, color, arr) => {
     arr.push(plane);
 }
 
-const textureLoader = new TextureLoader();
+class TerrainGen {
+  constructor(scene, player) {
+    this.scene = scene;
+    this.player = player;
+    this.queueIn = new Queue();
+    this.queueOut = new Queue();
+    this.texture = textureLoader.load("/resources/textures/space_floor.jpg");
+    
+    this.quaternion = new Quaternion();
+    this.quaternion.setFromAxisAngle(new Vector3(1, 0, 0), Math.PI / 2);
 
-let tTexture = textureLoader.load("/resources/textures/space_floor.jpg");
+    this.terrainPlane = new PlaneGeometry(1, 1);
+    this.terrainMaterial = new MeshBasicMaterial({
+      map: this.texture,
+      side: BackSide,
+      blending: CustomBlending,
+      blendEquaction: AddEquation,
+      blendSrc: OneFactor,
+      blendDst: OneFactor
+    });
 
-// terrain generation starts from here
-const terrainPlane = new PlaneGeometry(1, 1);
-const terrainMaterial = new MeshBasicMaterial({
-  map: tTexture,
-  side: BackSide,
-  blending: CustomBlending,
-  blendEquaction: AddEquation,
-  blendSrc: OneFactor,
-  blendDst: OneFactor
-});
 
-const quaternion = new Quaternion();
-quaternion.setFromAxisAngle(new Vector3(1, 0, 0), Math.PI / 2);
-let newChunk = false;
+    this.createTerrainPlane = () => {
 
-let createTerrainPlane = (scene, player, queue) => {
-  for (let i = 0; i < 90; i++) {
-    let thisPlane = new Mesh(terrainPlane, terrainMaterial);
-    thisPlane.name = "TerrainPlane";
-    thisPlane.position.z = -50;
-    thisPlane.applyQuaternion(quaternion);
-    queue.enqueue(thisPlane);
-  }
-}
-
-let generateTerrain = (scene, player, queueIn, queueOut) => {
-  // loop to set up the initial terrain tiles     
-  for (let i = 0; i < player.position.z + 30; i++) {
-    if (!queueIn.isEmpty()) {
-      // loop : sets the x position of tile
-      for (let j = 0; j < 3; j++) {
-        let thisPlane = queueIn.dequeue();
-        thisPlane.position.set(j - 1, 0, i);
-        scene.add(thisPlane);
-        queueOut.enqueue(thisPlane);
+      for (let i = 0; i < 90; i++) {
+        this.thisPlane = new Mesh( this.terrainPlane,  this.terrainMaterial);
+        this.thisPlane.name = "TerrainPlane";
+        this.thisPlane.position.z = -50;
+        this.thisPlane.applyQuaternion(this.quaternion);
+        this.queueIn.enqueue(this.thisPlane);
       }
     }
-  }
 
-  // second queue : will update position for each tile
-  queueOut.allElements().forEach((element) => {
-    if (element.position.z < player.position.z - 5) {
-      element.position.z += 30;
-  
+    this.generateTerrain = () => {
+      // loop to set up the initial terrain tiles     
+      for (let i = 0; i < this.player.position.z + 30; i++) {
+        if (!this.queueIn.isEmpty()) {
+          // loop : sets the x position of tile
+          for (let j = 0; j < 3; j++) {
+            this.thisPlane = this.queueIn.dequeue();
+            this.thisPlane.position.set(j - 1, 0, i);
+            this.scene.add(this.thisPlane);
+            this.queueOut.enqueue(this.thisPlane);
+          }
+        }
+      }
+
+      // second queue : will update position for each tile
+      this.queueOut.allElements().forEach((element) => {
+        if (element.position.z < player.position.z - 5) {
+          element.position.z += 30;
+        }
+      }
+      );
     }
   }
-  );
 }
 
 // create player character 
-Player = (widthX, heightY, depthZ, playerColor) => {
-  let myPlayer = new Object3D();
+class Player {
+  constructor(scene) {
+    this.scene = scene;
 
-  const geometry = new BoxGeometry(widthX, heightY, depthZ);
-
-  // green 0x00ff00
-  const material = new MeshPhongMaterial({
-    color: playerColor,
-    shininess: 40,
-    specular: 0x111111,
-    emissive: 0x0,
-  });
-
-  playerModel = new ModelManager(myPlayer, 0.01,0.01,0.01);
-  playerModel.loadModels("/resources/3dModels/wraith.glb", "Player");
+    this.myPlayer = new Object3D();
+    this.myPlayer.visible = true;
+    
+    this.playerModel = new ModelManager(this.myPlayer, 0.01, 0.01, 0.01);
+    this.playerModel.loadModels("/resources/3dModels/wraith.glb", "Player");
+    this.playerModel = null;
 
 
-  myPlayer.speed = 0.8;
-  myPlayer.lives = 3;
-  myPlayer.castShadow = true;
-  //myPlayer.attach(new Mesh(geometry, material));
-  myPlayer.name = "Player";
-  myPlayer.visible = true;
-  myPlayer.position.y = 0.5;
-  myPlayer.isJumping = false;
-  myPlayer.score = 0; 
-  myPlayer.highscore;
+    this.speed = 0.8;
+    this.lives = 3;
+    this.position = { x: 0, y: 0.5, z: 0 };
+    this.score = 0;
+    this.highscore = 0;
 
-  myPlayer.jump = () => {
-    let changePos;
-    let downPos;
+    this.castShadow = true;
+    this.visible = true;
+    this.isJumping = false;
 
-    // increase the y position    
-    if (myPlayer.isJumping == false) {
-      changePos = setInterval(() => {
-        if (myPlayer.position.y < 2.5) {
-          myPlayer.position.y += 0.5;
-        }
-        if (myPlayer.position.y > 2.4) {
-          myPlayer.isJumping = true;
-          clearInterval(changePos);
-        }
-      }, 100);
+    this.name = "Player";
 
-      // decrease the y position
-      downPos = setInterval(() => {
-        //console.log("IS JUMMMPP" + myPlayer.isJumping);
-        if (myPlayer.isJumping == true) {
-          if (myPlayer.position.y > 0.5)
-            myPlayer.position.y -= 0.5;
+    this.addToScene = () => {
+      this.scene.add(this.myPlayer);
+    }
 
-          if (myPlayer.position.y <= 0.6) {
+    this.moveForward = () => {
+      this.position.z += this.speed / 5;
+      this.myPlayer.position.x = this.position.x;
+      this.myPlayer.position.y = this.position.y;
+      this.myPlayer.position.z = this.position.z;
+    }
 
-            myPlayer.position.y = 0.5;
-            myPlayer.isJumping = false;
+    this.jump = () => {
+      this.changePos;
+      this.downPos;
 
-            clearInterval(downPos);
+      // increase the y position    
+      if (this.isJumping == false) {
+        this.changePos = setInterval(() => {
+          if (this.position.y < 2.5) {
+            this.position.y += 0.5;
           }
-        }
-      }, 100)
+          if (this.position.y > 2.4) {
+            this.isJumping = true;
+            clearInterval(this.changePos);
+          }
+        }, 100);
+
+        // decrease the y position
+        this.downPos = setInterval(() => {
+          //console.log("IS JUMMMPP" + myPlayer.isJumping);
+          if (this.isJumping == true) {
+            if (this.position.y > 0.5)
+              this.position.y -= 0.5;
+
+            if (this.position.y <= 0.6) {
+
+              this.position.y = 0.5;
+              this.isJumping = false;
+
+              clearInterval(this.downPos);
+            }
+          }
+        }, 100)
+      }
     }
   }
-  return myPlayer;
 }
 
 // adds all objects in the array in the scene. 
@@ -229,4 +235,4 @@ gameObjects = (scene) => {
   return allObjects;
 }
 
-export {createCylinder, gameObjects, createCube, createCone, Player, skyCube, createPlane, allMaterials, createTerrainPlane, generateTerrain }
+export { TerrainGen, createCylinder, gameObjects, createCube, createCone, Player, skyCube, createPlane, allMaterials }

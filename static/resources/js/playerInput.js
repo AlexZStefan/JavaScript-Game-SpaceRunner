@@ -8,13 +8,11 @@ renderFrame = true;
 export default playerControlls = (player) => {
   document.addEventListener('keydown', logKey);
 
-
   function logKey(e) {
     // console.log(`key=${event.key},code=${event.code}`);
     //all keys at: https://keycode.info
 
-    switch (e.keyCode) {
-      
+    switch (e.keyCode) {      
       case 27: // Stop animation function  ESCAPE       
         if (player.lives > 0) {
           setGameRunning();

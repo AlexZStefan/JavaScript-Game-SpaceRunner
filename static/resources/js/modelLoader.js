@@ -49,6 +49,7 @@ modelLoader =  new GLTFLoader(manager);
       this.model.name = `${name}`;    
 
       this.object.attach(glb.scene);
+      
     });    
     return this; 
   };
