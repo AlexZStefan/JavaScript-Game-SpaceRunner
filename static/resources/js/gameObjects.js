@@ -3,23 +3,21 @@ import {
   CylinderGeometry, PlaneGeometry,/* side of geometry*/ DoubleSide, BackSide, FrontSide, Mesh,
   MeshBasicMaterial, MeshStandardMaterial, MeshPhongMaterial, Group, Quaternion, Vector3,
   Euler, Object3D, TextureLoader, UVMapping, RepeatWrapping, AdditiveBlending, CustomBlending,
-  AddEquation, OneFactor, ZeroFactor, SubtractEquation
+  AddEquation, OneFactor, ZeroFactor, SubtractEquation, AnimationMixer, Clock
 }
-  from "https://unpkg.com/three@0.133.1/build/three.module.js"
+  from "https://unpkg.com/three@0.127.0/build/three.module.js"
 
 import { Queue } from "./functions.js"
 
-import { ModelManager } from "./modelLoader.js"
+import { FBXModelManager } from "./modelLoader.js"
 
 // functions
 let skyCube, allMaterials, gameLights, createCube, createCone, createPlane,
   gameObjects, createCylinder;
 
-//variables
-
-// create the game background 
 const textureLoader = new TextureLoader();
 
+// create the game background 
 skyCube = (scene) => {
   textureLoader.load("./resources/textures/skyArt.jpg", (texture) => {
     scene.background = texture;
@@ -92,6 +90,42 @@ createPlane = (widthX, heightY, color, arr) => {
     arr.push(plane);
 }
 
+class Coin extends Object3D {
+  constructor() {
+    super();
+    this.texture;
+    this.geometry;
+    this.mesh;
+    //this.position = {x, y,z};
+    //this.position = new Position();
+    this.material;
+  }
+
+  createCylinder(radiusTop, radiusBottom, height, radialSegments, heightSegments) {
+    this.geometry = new CylinderGeometry(radiusTop, radiusBottom, height, radialSegments, heightSegments);
+    this.material = new MeshPhongMaterial({ map: this.texture });
+    this.attach(new Mesh(this.geometry, this.material));
+    // rotate the object to face the up position
+    this.rotateX(1.62);
+    return this;
+  }
+
+  loadTexture(path) {
+    const loader = new TextureLoader();
+    this.texture = loader.load(`${path}`);
+    return this;
+  }
+
+  addToScene(scene) {
+    //this.object.position.set(0,0,15);
+    scene.add(this.object);
+  }
+
+  update() {
+    this.rotation.z += 0.05;
+  }
+}
+
 class TerrainGen {
   constructor(scene, player) {
     this.scene = scene;
@@ -99,7 +133,7 @@ class TerrainGen {
     this.queueIn = new Queue();
     this.queueOut = new Queue();
     this.texture = textureLoader.load("/resources/textures/space_floor.jpg");
-    
+
     this.quaternion = new Quaternion();
     this.quaternion.setFromAxisAngle(new Vector3(1, 0, 0), Math.PI / 2);
 
@@ -112,60 +146,51 @@ class TerrainGen {
       blendSrc: OneFactor,
       blendDst: OneFactor
     });
+  }
 
+  createTerrainPlane = () => {
+    for (let i = 0; i < 90; i++) {
+      this.thisPlane = new Mesh(this.terrainPlane, this.terrainMaterial);
+      this.thisPlane.name = "TerrainPlane";
+      this.thisPlane.position.z = -50;
+      this.thisPlane.applyQuaternion(this.quaternion);
+      this.queueIn.enqueue(this.thisPlane);
+    }
+  }
 
-    this.createTerrainPlane = () => {
-
-      for (let i = 0; i < 90; i++) {
-        this.thisPlane = new Mesh( this.terrainPlane,  this.terrainMaterial);
-        this.thisPlane.name = "TerrainPlane";
-        this.thisPlane.position.z = -50;
-        this.thisPlane.applyQuaternion(this.quaternion);
-        this.queueIn.enqueue(this.thisPlane);
+  generateTerrain = () => {
+    // loop to set up the initial terrain tiles     
+    for (let i = 0; i < this.player.position.z + 30; i++) {
+      if (!this.queueIn.isEmpty()) {
+        // loop : sets the x position of tile
+        for (let j = 0; j < 3; j++) {
+          this.thisPlane = this.queueIn.dequeue();
+          this.thisPlane.position.set(j - 1, 0, i);
+          this.scene.add(this.thisPlane);
+          this.queueOut.enqueue(this.thisPlane);
+        }
       }
     }
 
-    this.generateTerrain = () => {
-      // loop to set up the initial terrain tiles     
-      for (let i = 0; i < this.player.position.z + 30; i++) {
-        if (!this.queueIn.isEmpty()) {
-          // loop : sets the x position of tile
-          for (let j = 0; j < 3; j++) {
-            this.thisPlane = this.queueIn.dequeue();
-            this.thisPlane.position.set(j - 1, 0, i);
-            this.scene.add(this.thisPlane);
-            this.queueOut.enqueue(this.thisPlane);
-          }
-        }
+    // second queue : will update position for each tile
+    this.queueOut.allElements().forEach((element) => {
+      if (element.position.z < this.player.position.z - 5) {
+        element.position.z += 30;
       }
-
-      // second queue : will update position for each tile
-      this.queueOut.allElements().forEach((element) => {
-        if (element.position.z < player.position.z - 5) {
-          element.position.z += 30;
-        }
-      }
-      );
     }
+    );
   }
 }
 
 // create player character 
-class Player {
+class Player extends Object3D {
   constructor(scene) {
+    super();
     this.scene = scene;
-
-    this.myPlayer = new Object3D();
-    this.myPlayer.visible = true;
-    
-    this.playerModel = new ModelManager(this.myPlayer, 0.01, 0.01, 0.01);
-    this.playerModel.loadModels("/resources/3dModels/wraith.glb", "Player");
-    this.playerModel = null;
-
 
     this.speed = 0.8;
     this.lives = 3;
-    this.position = { x: 0, y: 0.5, z: 0 };
+
     this.score = 0;
     this.highscore = 0;
 
@@ -174,52 +199,95 @@ class Player {
     this.isJumping = false;
 
     this.name = "Player";
+    this.c = 0;
+    this.mixer = null;
+  }
 
-    this.addToScene = () => {
-      this.scene.add(this.myPlayer);
+  init() {
+    this.position.set(0, 0, 0);
+
+    // weight pain limit 4 / vert
+    this.assetLoader = new FBXModelManager(this, 0.005);
+
+    this.assetLoader.loadModels("/resources/3dModels/try2.fbx");
+
+    this.assetLoader.loadAnimation("/resources/3dModels/animations/run.fbx");
+    this.assetLoader.loadAnimation("/resources/3dModels/animations/jump.fbx");
+
+    setInterval(() => {
+      this.c++;
+    }, 100)
+  }
+
+  playAnimation() {
+    //console.log(this.isJumping);
+    if (this.mixer == null) {
+      this.mixer = new AnimationMixer(this.children[0]);
     }
 
-    this.moveForward = () => {
-      this.position.z += this.speed / 5;
-      this.myPlayer.position.x = this.position.x;
-      this.myPlayer.position.y = this.position.y;
-      this.myPlayer.position.z = this.position.z;
+    if (!this.isJumping) {
+      const run = this.mixer.clipAction(this.animations[0]);
+      this.mixer.stopAllAction();
+      run.play();
     }
-
-    this.jump = () => {
-      this.changePos;
-      this.downPos;
-
-      // increase the y position    
-      if (this.isJumping == false) {
-        this.changePos = setInterval(() => {
-          if (this.position.y < 2.5) {
-            this.position.y += 0.5;
-          }
-          if (this.position.y > 2.4) {
-            this.isJumping = true;
-            clearInterval(this.changePos);
-          }
-        }, 100);
-
-        // decrease the y position
-        this.downPos = setInterval(() => {
-          //console.log("IS JUMMMPP" + myPlayer.isJumping);
-          if (this.isJumping == true) {
-            if (this.position.y > 0.5)
-              this.position.y -= 0.5;
-
-            if (this.position.y <= 0.6) {
-
-              this.position.y = 0.5;
-              this.isJumping = false;
-
-              clearInterval(this.downPos);
-            }
-          }
-        }, 100)
-      }
+    else {
+      const run = this.mixer.clipAction(this.animations[1]);
+      this.mixer.stopAllAction();
+      run.play();
     }
+  }
+
+  addToScene = () => {
+    this.scene.add(this);
+  }
+
+  jump = () => {
+    this.changePos;
+    this.downPos;
+
+    // increase the y position    
+    if (this.isJumping == false) {
+      this.changePos = setInterval(() => {
+        if (this.position.y < 2.5) {
+          this.position.y += 0.5;
+        }
+        if (this.position.y > 2.4) {
+          this.isJumping = true;
+          clearInterval(this.changePos);
+        }
+      }, 100);
+
+      // decrease the y position
+      this.downPos = setInterval(() => {
+        //console.log("IS JUMMMPP" + myPlayer.isJumping);
+        if (this.isJumping == true) {
+          if (this.position.y > 0.5)
+            this.position.y -= 0.5;
+
+          if (this.position.y <= 0.6) {
+
+            this.position.y = 0.5;
+            this.isJumping = false;
+
+            clearInterval(this.downPos);
+          }
+        }
+      }, 100)
+    }
+  }
+
+
+  update = () => {
+    this.score++;
+    // increase speed overtime         
+    if (this.score < 10000) this.speed += 0.00005;
+
+    this.position.z += this.speed / 5;
+
+    // play and update animations
+    this.playAnimation();
+    this.mixer.update(this.c);
+
   }
 }
 
@@ -235,4 +303,4 @@ gameObjects = (scene) => {
   return allObjects;
 }
 
-export { TerrainGen, createCylinder, gameObjects, createCube, createCone, Player, skyCube, createPlane, allMaterials }
+export { TerrainGen, Coin, createCylinder, gameObjects, createCube, createCone, Player, skyCube, createPlane, allMaterials }

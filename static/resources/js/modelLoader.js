@@ -1,10 +1,11 @@
-import { MeshBasicMaterial, Mesh, LoadingManager} from "https://unpkg.com/three@0.127.0/build/three.module.js"
+import { Clock, MeshBasicMaterial, Mesh, AnimationMixer, AnimationClip, LoadingManager, Object3D } from "https://unpkg.com/three@0.127.0/build/three.module.js"
 
-import {GLTFLoader} from "https://unpkg.com/three@0.127.0/examples/jsm/loaders/GLTFLoader.js";
+import { FBXLoader } from "https://unpkg.com/three@0.127.0/examples/jsm/loaders/FBXLoader.js";
 
+import {gameLoading} from "./main.js"
 
 // variables
-let  modelLoader;
+let modelLoader, fbxLoader;
 
 // functions 
 
@@ -17,7 +18,8 @@ manager.onStart = (url, itemsLoaded, itemsTotal) => {
 
 manager.onLoad = () => {
   //playerMesh = scene.getObjectByName('Player');
-  console.log('3dModel loading complete!'); 
+  console.log('3dModel loading complete!');
+  gameLoading();
 };
 
 manager.onProgress = (url, itemsLoaded, itemsTotal) => {
@@ -28,43 +30,28 @@ manager.onError = (url) => {
   console.log('There was an error loading ' + url);
 };
 
-modelLoader =  new GLTFLoader(manager);
+fbxLoader = new FBXLoader(manager);
 
-  class ModelManager {
-  constructor(object, scaleX, scaleY,scaleZ ){   
-    this.object= object;
-    this.scaleX = scaleX;
-    this.scaleY = scaleY;
-    this.scaleZ = scaleZ;
-    this.model;
-  };
+class FBXModelManager{  
+  constructor(object , scale){    
+    this.scalar = scale;
+    this.object = object;
+  }
 
-  loadModels = (path, name) => {
-    // load the model and add it in an array
-    modelLoader.load(`${path}`, (glb) => {
-          
-      this.model = glb.scene; 
-      this.model.scale.set(this.scaleX,this.scaleY, this.scaleZ);
-   
-      this.model.name = `${name}`;    
+     loadAnimation (path) {
+      const anim = new FBXLoader(manager);
+      anim.load(`${path}`, (anim) => {
+        this.object.animations.push(anim.animations[0]);
+      })   
+    }
 
-      this.object.attach(glb.scene);
-      
-    });    
-    return this; 
-  };
-
+     loadModels (path) {
+      // load the model and add it in an array
+      fbxLoader.load(`${path}`, (fbx) => {
+        fbx.scale.multiplyScalar(this.scalar);      
+        this.object.add(fbx);  
+      });     
+    }   
 };
 
-// let loadThis = (scene)=>{
-//     modelLoader.load("/resources/3dModels/wraith.glb", (glb)=>{
-//         let model = glb.scene;
-//          model.scale.set(0.05,0.05,0.05);
-//          model.position.set(0,0,15);
-//        // model.material = new MeshBasicMaterial({ color: 0xffff00 });
-//         console.log(glb + "ASDASDSA DAS");
-//         scene.add(model);
-//     })
-// }
-
-export {  ModelManager};
+export { FBXModelManager };

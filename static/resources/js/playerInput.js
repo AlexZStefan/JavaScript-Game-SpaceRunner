@@ -21,7 +21,7 @@ export default playerControlls = (player) => {
       case 13:       // ENTER
         break;
       case 87: //w
-        player.position.z += 0.1;
+      player.jump(); 
         break;
       case 68: //a
         if (player.position.x > -1) { player.position.x -= 1; };
@@ -37,12 +37,10 @@ export default playerControlls = (player) => {
         break;
       case 32: // space
         // clamp the y player position 
-        if (player.position.y >= 0.6) {
-          player.position.y -= 0.1;
-        }        
+        
         break;
       case 17: // ControlLeft
-        player.jump();  
+     
         //console.log(e.keyCode);      
         break;
     }

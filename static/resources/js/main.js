@@ -3,28 +3,35 @@
 // fix when player pauses the spawn enemy
 
 import { init } from "./init.js";
-/*{animationBool}*/
-import playerControlls, { renderFrame } from "./playerInput.js";
 
-import gameLights, {TerrainGen, Player, createCube, gameObjects, skyCube } from "./gameObjects.js";
+import playerControlls from "./playerInput.js";
 
-import { addEnemies, enemySpawner, createEnemyPool } from "./createEnemy.js";
-import { Queue, /*generateTerrain*/ onCollision } from "./functions.js";
+import gameLights, { TerrainGen, Player, createCube, gameObjects, skyCube } from "./gameObjects.js";
+
+import { addEnemies, createEnemyPool, Spawner } from "./createEnemy.js";
+import { Queue, onCollision } from "./functions.js";
 
 import { addListener } from "./audioManager.js";
+
+import { Clock } from "https://unpkg.com/three@0.127.0/build/three.module.js"
+
+import {ParticleSystem} from "./particles.js"
+
+
 
 // declare variables 
 let gameScene, gameCamera, gameRenderer, myPlayer, myEvent,
   setGameOver, alertMe, allEnemies, score, playerScore, enemyPool,
   enemy, playerLives, playerHighScore, gameOver, menu, highscore,
-  gameRunning, startButton, gameTerrain;
+  gameRunning, startButton, gameTerrain, clock, gameLoaded, enemySpawner, coinSpawner;
 
 // declare functions
-let initializer, animate, animationFrame;
+let initializer, animate, animationFrame, gameLoading;
 
 // BOOLS 
 gameRunning = false;
 gameOver = false;
+gameLoaded = false;
 
 // initialize the game and stores camera, scene and renderer
 initializer = init();
@@ -32,33 +39,27 @@ gameScene = initializer[0];
 gameRenderer = initializer[1];
 gameCamera = initializer[2];
 
-let terrainQueue = new Queue();
-
 // CREATE PLAYER
 myPlayer = new Player(gameScene);
+myPlayer.init();
 myPlayer.addToScene();
 
 // HANDLES PLAYER INPUT
 playerControlls(myPlayer);
 
-// Enemy instatiation 
-enemyPool = createEnemyPool(0);
-// used on collision
-let enemiesTest = enemyPool.allElements();
-// ENEMY SPAWNER - calles recursevly  
-enemy = enemySpawner(enemyPool, myPlayer, gameScene, gameRunning);
+// called when models are loaded. find in modelLoader.js
+gameLoading = () => {
+  gameLoaded = true;
+}
 
-// Collectable instantiation
-let coins = createEnemyPool(1);
-let coinPool = coins.allElements();
-let coin = enemySpawner(coins, myPlayer, gameScene);
+let PS = new ParticleSystem(gameScene);
+PS.createPS();
 
-let cube1 = createCube(1, 1, 1, 0xfe1100);
-let cube2 = createCube(1, 1, 1, 0xfe1100);
-cube1.position.set(2, 1, 5);
-cube2.position.set(-2, 1, 5);
-gameScene.add(cube1);
-gameScene.add(cube2);
+
+enemySpawner = new Spawner(gameScene, myPlayer, 0);
+enemySpawner.createEnemyPool().SpawnEnemy();
+coinSpawner = new Spawner(gameScene, myPlayer, 1);
+coinSpawner.createEnemyPool().SpawnEnemy();
 
 // ADD OBJECTS TO SCENE
 // scene background 
@@ -80,13 +81,10 @@ let setGameRunning = () => {
       startButton.innerHTML = "Resume";
     }, 500);
   }
-  
 }
 
-gameTerrain = new TerrainGen(gameScene, myPlayer); 
+gameTerrain = new TerrainGen(gameScene, myPlayer);
 gameTerrain.createTerrainPlane();
-
-//createTerrainPlane(gameScene, myPlayer, terrainPlanesQueue);
 
 // trigger event when dom is loaded and set the splash screen opacity to 0 and starts the game 
 document.addEventListener('DOMContentLoaded', (e) => {
@@ -96,7 +94,7 @@ document.addEventListener('DOMContentLoaded', (e) => {
 
   (animate = () => {
     // set the framerate
-    setTimeout(() => {
+    if (gameLoaded == true) {
       // SHOW MENU IF PAUSED
       if (!gameRunning && !gameOver) {
         if (myPlayer.lives <= 0) {
@@ -116,27 +114,9 @@ document.addEventListener('DOMContentLoaded', (e) => {
         // hide the menu 
         menu.style.opacity = 0;
 
-        console.log(myPlayer);
-
-        // set the player score 
-
-        //myPlayer.score++;
-
-
-
+     
         // set UI player score
         playerScore.innerHTML = "Score :" + myPlayer.score;
-
-        // increase speed overtime 
-        if (myPlayer.score < 1200) myPlayer.speed += 0.001;
-       
-
-        // pushes player forward 
-        myPlayer.moveForward();
-    
-        //gravity
-
-        // set camera position so that it matches the player 
 
         gameCamera.position.z = myPlayer.position.z - 4;
         gameCamera.position.y = myPlayer.position.y + 2;
@@ -145,28 +125,23 @@ document.addEventListener('DOMContentLoaded', (e) => {
         gameTerrain.generateTerrain();
         //generateTerrain(gameScene, myPlayer, terrainPlanesQueue, terrainPlanesQueueOut);
 
-        cube2.rotateX(5);
-        cube1.rotateX(-5);
-
-        // Collision detection on each enemy
-        enemiesTest.forEach(enemy =>
-          // dificulty can be increased in the CreateEnemy callbackF
+        // Collision detection on each enemy       
+        enemySpawner.pool.allElements().forEach(enemy =>
           onCollision(myPlayer, enemy));
 
-        coinPool.forEach(coin => onCollision(myPlayer, coin));
+        coinSpawner.update();
+        coinSpawner.pool.allElements().forEach(coin => onCollision(myPlayer, coin));
 
+        myPlayer.update();
 
         gameRenderer.render(gameScene, gameCamera);
       }
-
+    }
+    setTimeout(() => {
       animationFrame = requestAnimationFrame(animate);
     }
       , 1000 / 60); // frame limit 
-
-
-  })(); // animate func 
-
-  // renders the game after everything was loaded 
+  })(); 
 });
 
 // EVENTS
@@ -191,4 +166,4 @@ startButton = document.getElementById("start");
 startButton.addEventListener("click", setGameRunning);
 
 
-export { animationFrame, setGameRunning };
+export { animationFrame, setGameRunning, gameLoading };

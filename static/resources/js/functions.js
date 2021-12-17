@@ -66,11 +66,9 @@ onCollision = (p1, p2) => {
         playAudio(0);
       }
 
-      p2.children[0].material.color.setHex(0xFFFFFF);
+      //p2.children[0].material.color.setHex(0xFFFFFF);
       p2.visible = false;
-
-    }
-    
+    }    
   }
 };
 
