@@ -113,7 +113,6 @@ document.addEventListener('DOMContentLoaded', (e) => {
       if (gameRunning) {
         // hide the menu 
         menu.style.opacity = 0;
-
      
         // set UI player score
         playerScore.innerHTML = "Score :" + myPlayer.score;
@@ -133,7 +132,12 @@ document.addEventListener('DOMContentLoaded', (e) => {
         coinSpawner.pool.allElements().forEach(coin => onCollision(myPlayer, coin));
 
         myPlayer.update();
+        PS.update();
 
+
+
+
+        
         gameRenderer.render(gameScene, gameCamera);
       }
     }
