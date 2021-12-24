@@ -54,4 +54,4 @@ class FBXModelManager{
     }   
 };
 
-export { FBXModelManager };
+export { FBXModelManager, manager };

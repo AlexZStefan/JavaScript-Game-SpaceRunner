@@ -1,3 +1,40 @@
+.controlls {
+  position: absolute;
+  z-index: 120;
+  top: 80%;
+
+  margin-left: 10%; 
+
+  opacity: 1;
+
+  display: grid;
+  width: 80%;
+  grid-gap: 400px;  
+  padding: 0px;
+}
+
+.button1{
+  font-size: 20px;
+  height: auto;
+  width: 20%;
+  background-color: rgba(0, 174, 255, 0.822);
+}
+
+.button2{
+  font-size: 20px;
+  height: auto;
+  width: 20%;
+  background-color: rgba(0, 174, 255, 0.822);
+}
+
+
+.button3{
+  font-size: 20px;
+  height: auto;
+  width: 20%;
+  background-color: rgba(0, 174, 255, 0.822);
+}
+
 .form{
   background-color: rgb(135, 195, 251);
 }
@@ -64,12 +101,12 @@
   z-index: 110;
   top: 115px;
 
-  margin-left: 40%; 
+  margin-left: 25%; 
 
   opacity: 0;
   background-color: rgba(0, 174, 255, 0.822);
   display: grid;
-  width: 25%;
+  width: 50%;
   grid-gap: 0px;  
   padding: 0px;
 }

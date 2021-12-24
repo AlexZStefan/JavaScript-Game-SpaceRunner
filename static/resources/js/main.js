@@ -2,7 +2,7 @@
 
 // fix when player pauses the spawn enemy
 
-import { init } from "./init.js";
+import {  GameScreen } from "./init.js";
 
 import playerControlls from "./playerInput.js";
 
@@ -13,17 +13,17 @@ import { Queue, onCollision } from "./functions.js";
 
 import { addListener } from "./audioManager.js";
 
-import { Clock } from "https://unpkg.com/three@0.127.0/build/three.module.js"
 
 import {ParticleSystem} from "./particles.js"
 
-
+import {playAudio} from "./audioManager.js"
+import { apply } from "body-parser";
 
 // declare variables 
 let gameScene, gameCamera, gameRenderer, myPlayer, myEvent,
   setGameOver, alertMe, allEnemies, score, playerScore, enemyPool,
   enemy, playerLives, playerHighScore, gameOver, menu, highscore,
-  gameRunning, startButton, gameTerrain, clock, gameLoaded, enemySpawner, coinSpawner;
+  gameRunning, startButton, gameTerrain, clock, gameLoaded, enemySpawner, coinSpawner,gameInit,loadCamera,loadScene;
 
 // declare functions
 let initializer, animate, animationFrame, gameLoading;
@@ -34,10 +34,12 @@ gameOver = false;
 gameLoaded = false;
 
 // initialize the game and stores camera, scene and renderer
-initializer = init();
-gameScene = initializer[0];
-gameRenderer = initializer[1];
-gameCamera = initializer[2];
+gameInit = new GameScreen();
+gameScene = gameInit.gameScene;
+gameRenderer = gameInit.renderer;
+gameCamera = gameInit.gameCamera;
+loadCamera = gameInit.loadingCamera;
+loadScene = gameInit.loadingScene;
 
 // CREATE PLAYER
 myPlayer = new Player(gameScene);
@@ -50,16 +52,12 @@ playerControlls(myPlayer);
 // called when models are loaded. find in modelLoader.js
 gameLoading = () => {
   gameLoaded = true;
+  
+  
 }
 
-let PS = new ParticleSystem(gameScene);
-PS.createPS();
-
-
-enemySpawner = new Spawner(gameScene, myPlayer, 0);
-enemySpawner.createEnemyPool().SpawnEnemy();
-coinSpawner = new Spawner(gameScene, myPlayer, 1);
-coinSpawner.createEnemyPool().SpawnEnemy();
+let PS = new ParticleSystem(gameScene, myPlayer);
+PS.createPS(0,0,60);
 
 // ADD OBJECTS TO SCENE
 // scene background 
@@ -72,7 +70,7 @@ addListener(gameScene);
 
 // set the game to pause or unpaused
 let setGameRunning = () => {
-
+  playAudio("gameMusic");
   if (gameRunning == true) gameRunning = false;
   else gameRunning = true;
   if (!gameOver) {
@@ -82,6 +80,19 @@ let setGameRunning = () => {
     }, 500);
   }
 }
+
+
+
+enemySpawner = new Spawner(gameScene, myPlayer, 0);
+enemySpawner.createEnemyPool().SpawnEnemy();
+coinSpawner = new Spawner(gameScene, myPlayer, 1);
+coinSpawner.createEnemyPool().SpawnEnemy();
+
+// timer 
+let c = 0;
+setInterval(()=>{
+  c++; 
+},100)
 
 gameTerrain = new TerrainGen(gameScene, myPlayer);
 gameTerrain.createTerrainPlane();
@@ -94,11 +105,16 @@ document.addEventListener('DOMContentLoaded', (e) => {
 
   (animate = () => {
     // set the framerate
+    
     if (gameLoaded == true) {
+     
       // SHOW MENU IF PAUSED
       if (!gameRunning && !gameOver) {
         if (myPlayer.lives <= 0) {
           gameOver = true;
+          
+  
+          
         }
         menu.style.opacity = 1;
       }
@@ -113,6 +129,8 @@ document.addEventListener('DOMContentLoaded', (e) => {
       if (gameRunning) {
         // hide the menu 
         menu.style.opacity = 0;
+
+      PS.update();
      
         // set UI player score
         playerScore.innerHTML = "Score :" + myPlayer.score;
@@ -125,22 +143,22 @@ document.addEventListener('DOMContentLoaded', (e) => {
         //generateTerrain(gameScene, myPlayer, terrainPlanesQueue, terrainPlanesQueueOut);
 
         // Collision detection on each enemy       
-        enemySpawner.pool.allElements().forEach(enemy =>
-          onCollision(myPlayer, enemy));
+        enemySpawner.pool.allElements().forEach(enemy => onCollision(myPlayer, enemy));
 
         coinSpawner.update();
         coinSpawner.pool.allElements().forEach(coin => onCollision(myPlayer, coin));
 
         myPlayer.update();
-        PS.update();
 
-
-
-
-        
-        gameRenderer.render(gameScene, gameCamera);
+          gameRenderer.render(gameScene, gameCamera);
       }
     }
+    else
+    {
+      gameInit.loadingScreenUpdate();
+         gameRenderer.render(loadScene, loadCamera);
+    }       
+        
     setTimeout(() => {
       animationFrame = requestAnimationFrame(animate);
     }
@@ -151,8 +169,11 @@ document.addEventListener('DOMContentLoaded', (e) => {
 // EVENTS
 setGameOver = new Event('gameOver');
 document.addEventListener('gameOver', alertMe = () => {
+  
+
+  startButton.removeEventListener("click", setGameRunning );
+  startButton.addEventListener("click", ()=>{location.reload()} );
   startButton.innerHTML = "Restart";
-  location.reload();
 });
 
 // HTML DOC

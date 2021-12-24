@@ -1,6 +1,6 @@
 import { animationFrame, setGameRunning } from "./main.js"
 
-let playerControlls, animationCancel, animationBool, renderFrame;
+let playerControlls, renderFrame;
 
 renderFrame = true;
 
@@ -8,9 +8,29 @@ renderFrame = true;
 export default playerControlls = (player) => {
   document.addEventListener('keydown', logKey);
 
+
+  const left = document.getElementById("left");
+  left.addEventListener("click", ()=> {
+    
+    if (player.position.x < 1) { player.position.x += 1; }
+  });
+  
+  const right = document.getElementById("right");
+  right.addEventListener("click", ()=>{
+    if (player.position.x > -1) { player.position.x -= 1; };
+  });
+  
+  const jump = document.getElementById("jump");
+  jump.addEventListener("click", ()=>player.jump());
+  
+  
+
+
   function logKey(e) {
     // console.log(`key=${event.key},code=${event.code}`);
     //all keys at: https://keycode.info
+
+
 
     switch (e.keyCode) {      
       case 27: // Stop animation function  ESCAPE       
@@ -50,3 +70,5 @@ export default playerControlls = (player) => {
 }
 
 export { renderFrame };
+
+

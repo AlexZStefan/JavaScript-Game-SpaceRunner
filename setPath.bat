@@ -1,3 +1,3 @@
-@cd F:\Projects\SpaceRunnerJavascript\sr4
-@set PATH=F:\Projects\server\nodejs;%PATH%
+@cd C:\GitHub\SpaceRunner
+@set PATH=C:\GitHub\nodejs;%PATH%
 @cmd.exe /K

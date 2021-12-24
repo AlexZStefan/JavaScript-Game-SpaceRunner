@@ -21,9 +21,9 @@ addListener = (camera) => {
 }
 
 // game music 
-AUDIOLOADER.load("resources/audio/aud.wav", (buffer) => {
+AUDIOLOADER.load("resources/audio/background.wav", (buffer) => {
   gameMusic.setBuffer(buffer);
-  gameMusic.setLoop(false);
+  gameMusic.setLoop(true);
   gameMusic.setVolume(0.5);
 },
 
@@ -38,8 +38,25 @@ AUDIOLOADER.load("resources/audio/aud.wav", (buffer) => {
   }
 );
 
+AUDIOLOADER.load("resources/audio/death.wav", (buffer) => {
+  death.setBuffer(buffer);
+  death.setLoop(false);
+  death.setVolume(0.5);
+},
+
+  // out when audio loaded 
+  (xhr) => {
+    console.log((xhr.loaded / xhr.total * 100) + "% loaded");
+  },
+
+  // catch error if audio load failed
+  (err) => {
+    console.log("error happened");
+  }
+);
+
 // when crashing into enemy 
-AUDIOLOADER.load("resources/audio/aud.wav", (buffer) => {
+AUDIOLOADER.load("resources/audio/crash.wav", (buffer) => {
   crash.setBuffer(buffer);
   crash.setLoop(false);
   crash.setVolume(0.5);
@@ -57,7 +74,7 @@ AUDIOLOADER.load("resources/audio/aud.wav", (buffer) => {
 );
 
 // jump audio 
-AUDIOLOADER.load("resources/audio/aud.wav", (buffer) => {
+AUDIOLOADER.load("resources/audio/jump.wav", (buffer) => {
   jump.setBuffer(buffer);
   jump.setLoop(false);
   jump.setVolume(0.5);
@@ -75,7 +92,7 @@ AUDIOLOADER.load("resources/audio/aud.wav", (buffer) => {
 );
 
 // collection audio 
-AUDIOLOADER.load("resources/audio/aud.wav", (buffer) => {
+AUDIOLOADER.load("resources/audio/collect.wav", (buffer) => {
   collection.setBuffer(buffer);
   collection.setLoop(false);
   collection.setVolume(0.5);
@@ -93,13 +110,13 @@ AUDIOLOADER.load("resources/audio/aud.wav", (buffer) => {
 );
 
 playAudio = (value) => {
-  let sounds = [crash, death, jump];
+  let sounds = {"crash": crash, "death": death, "jump": jump, "collect": collection, "gameMusic" : gameMusic };
 
-  if (sounds[value].isPlaying) {
-    sounds[value].stop();
-    sounds[value].play();
+  if (sounds[`${value}`].isPlaying) {
+    sounds[`${value}`].stop();
+    sounds[`${value}`].play();
   }
   else sounds[value].play();
 }
 
-export { addListener, playAudio };
+export { addListener, playAudio, gameMusic };

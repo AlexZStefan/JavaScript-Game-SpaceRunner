@@ -1,15 +1,16 @@
 import {
   DirectionalLight, DirectionalLightHelper, AmbientLight, BoxGeometry, ConeGeometry,
-  CylinderGeometry, PlaneGeometry,/* side of geometry*/ DoubleSide, BackSide, FrontSide, Mesh,
+  CylinderGeometry, PlaneGeometry, DoubleSide, BackSide, FrontSide, Mesh,
   MeshBasicMaterial, MeshStandardMaterial, MeshPhongMaterial, Group, Quaternion, Vector3,
   Euler, Object3D, TextureLoader, UVMapping, RepeatWrapping, AdditiveBlending, CustomBlending,
-  AddEquation, OneFactor, ZeroFactor, SubtractEquation, AnimationMixer, Clock
+  AddEquation, OneFactor, ZeroFactor, SubtractEquation, AnimationMixer, Clock, LoopOnce
 }
   from "https://unpkg.com/three@0.127.0/build/three.module.js"
 
 import { Queue } from "./functions.js"
 
 import { FBXModelManager } from "./modelLoader.js"
+import {playAudio} from "./audioManager.js"
 
 // functions
 let skyCube, allMaterials, gameLights, createCube, createCone, createPlane,
@@ -145,6 +146,7 @@ class TerrainGen {
       blendEquaction: AddEquation,
       blendSrc: OneFactor,
       blendDst: OneFactor
+ 
     });
   }
 
@@ -204,6 +206,7 @@ class Player extends Object3D {
   }
 
   init() {
+     
     this.position.set(0, 0, 0);
 
     // weight pain limit 4 / vert
@@ -215,7 +218,7 @@ class Player extends Object3D {
     this.assetLoader.loadAnimation("/resources/3dModels/animations/jump.fbx");
 
     setInterval(() => {
-      this.c++;
+      this.c--;
     }, 100)
   }
 
@@ -231,9 +234,11 @@ class Player extends Object3D {
       run.play();
     }
     else {
+
       const run = this.mixer.clipAction(this.animations[1]);
       this.mixer.stopAllAction();
       run.play();
+    
     }
   }
 
@@ -244,50 +249,48 @@ class Player extends Object3D {
   jump = () => {
     this.changePos;
     this.downPos;
-
+    playAudio("jump");
     // increase the y position    
     if (this.isJumping == false) {
+      this.isJumping = true;
       this.changePos = setInterval(() => {
         if (this.position.y < 2.5) {
-          this.position.y += 0.5;
+          this.position.y += 0.25;
         }
-        if (this.position.y > 2.4) {
-          this.isJumping = true;
+        if (this.position.y >= 2.5) {
           clearInterval(this.changePos);
+
+          this.downPos = setInterval(() => {
+            //console.log("IS JUMMMPP" + myPlayer.isJumping);
+            if (this.isJumping == true) {
+
+              this.position.y -= 0.25;
+
+              if (this.position.y <= 0.6) {
+
+                this.position.y = 0;
+                this.isJumping = false;
+
+                clearInterval(this.downPos);
+              }
+            }
+          }, 30)
         }
-      }, 100);
+      }, 30);
 
       // decrease the y position
-      this.downPos = setInterval(() => {
-        //console.log("IS JUMMMPP" + myPlayer.isJumping);
-        if (this.isJumping == true) {
-          if (this.position.y > 0.5)
-            this.position.y -= 0.5;
-
-          if (this.position.y <= 0.6) {
-
-            this.position.y = 0.5;
-            this.isJumping = false;
-
-            clearInterval(this.downPos);
-          }
-        }
-      }, 100)
-    }
+    }  
   }
-
 
   update = () => {
     this.score++;
     // increase speed overtime         
     if (this.score < 10000) this.speed += 0.00005;
-
     this.position.z += this.speed / 5;
 
     // play and update animations
     this.playAnimation();
     this.mixer.update(this.c);
-
   }
 }
 

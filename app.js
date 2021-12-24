@@ -81,7 +81,7 @@ app.post('/signUp', (request, response)=> {
 				request.session.registered = true;
 				request.session.username = username;
         // insert data into database table
-        con.query(`INSERT INTO user (name, password) VALUES ("${username}", "${password}")`);
+        con.query(`INSERT INTO user (name, password, highscore) VALUES ("${username}", "${password}", "0")`);
 
 				response.redirect('/');
 			} else {
@@ -104,6 +104,9 @@ app.get("/", (req, res)=>{
 
 app.get("/game", (req, res)=>{
   res.sendFile(__dirname + "/static/game.html")
+
+  
+	
 });
 
 app.get("/signUp", (req, res)=>{
@@ -114,3 +117,5 @@ app.get("/signUp", (req, res)=>{
 app.get("*", (req, res)=>{
   res.status(404).sendFile(__dirname + "/404.html")
 });
+
+

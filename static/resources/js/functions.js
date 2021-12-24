@@ -51,6 +51,7 @@ onCollision = (p1, p2) => {
 
         if (p1.lives > 0) {
           p1.lives -= 1;
+          playAudio("crash");
           document.getElementById("playerLives").innerHTML = "Lives : " + p1.lives;
         }
 
@@ -58,12 +59,13 @@ onCollision = (p1, p2) => {
         if (p1.lives <= 0) {
           p1.lives = 0;
           setGameRunning();
+          playAudio("death");
         }
       }
 
       if (p2.name == "Coin") {
         p1.score += 100;
-        playAudio(0);
+        playAudio("collect");
       }
 
       //p2.children[0].material.color.setHex(0xFFFFFF);
