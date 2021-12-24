@@ -17,7 +17,7 @@ import { addListener } from "./audioManager.js";
 import {ParticleSystem} from "./particles.js"
 
 import {playAudio} from "./audioManager.js"
-import { apply } from "body-parser";
+
 
 // declare variables 
 let gameScene, gameCamera, gameRenderer, myPlayer, myEvent,
@@ -51,8 +51,7 @@ playerControlls(myPlayer);
 
 // called when models are loaded. find in modelLoader.js
 gameLoading = () => {
-  gameLoaded = true;
-  
+  gameLoaded = true;  
   
 }
 
@@ -111,8 +110,7 @@ document.addEventListener('DOMContentLoaded', (e) => {
       // SHOW MENU IF PAUSED
       if (!gameRunning && !gameOver) {
         if (myPlayer.lives <= 0) {
-          gameOver = true;
-          
+          gameOver = true;          
   
           
         }
@@ -192,3 +190,7 @@ startButton.addEventListener("click", setGameRunning);
 
 
 export { animationFrame, setGameRunning, gameLoading };
+
+module.exports.myPlayer = ()=>{
+  return myPlayer;
+};
