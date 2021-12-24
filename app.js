@@ -1,10 +1,10 @@
-import express from 'express';
+const express = require('express')
 const app = express()
 // port dynamically assigned by the hosting env so env variable is used
 // it`s part of env in which a process runs
 const port = process.env.PORT || 3000
 
-import mysql from 'mysql';
+let mysql = require('mysql');
 
 let con = mysql.createConnection({
   host: "localhost",
@@ -12,7 +12,6 @@ let con = mysql.createConnection({
   password: "",
   database: "cmp5360"
 });
-
 
 con.connect((err) =>{
   if (err) throw err;
@@ -27,18 +26,21 @@ app.listen(port, () => {
   console.log(`Example app listening at http://localhost:${port}`)
 });
 
+
+
 // can replace the app. use by calling this f in the app.post("/", urlencodedParser()
 
 app.use(express.json());
 app.use(express.urlencoded({extended:true}));
 
-import session from 'express-session';
+var session = require('express-session');
 
 app.use(session({
 	secret: 'secret',
 	resave: true,
 	saveUninitialized: true
 }));
+
 
 app.post('/', (request, response)=> {
 	let username = request.body.username;
@@ -76,7 +78,7 @@ app.post('/signUp', (request, response)=> {
 				request.session.registered = true;
 				request.session.username = username;
         // insert data into database table
-        con.query(`INSERT INTO user (name, password, score) VALUES ("${username}", "${password}", "0")`);
+        con.query(`INSERT INTO user (name, password, highscore) VALUES ("${username}", "${password}", "0")`);
 
 				response.redirect('/');
 			} else {
@@ -98,7 +100,9 @@ app.get("/", (req, res)=>{
 });
 
 app.get("/game", (req, res)=>{
-  res.sendFile(__dirname + "/static/game.html") 
+  res.sendFile(__dirname + "/static/game.html")
+
+  
 	
 });
 

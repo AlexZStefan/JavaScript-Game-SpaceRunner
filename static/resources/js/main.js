@@ -190,7 +190,3 @@ startButton.addEventListener("click", setGameRunning);
 
 
 export { animationFrame, setGameRunning, gameLoading };
-
-module.exports.myPlayer = ()=>{
-  return myPlayer;
-};
