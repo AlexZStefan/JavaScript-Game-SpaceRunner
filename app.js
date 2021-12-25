@@ -1,10 +1,22 @@
-const express = require('express')
-const app = express()
+import express from 'express';
+import session from 'express-session';
+import mysql from'mysql';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const app = express();
+
+//we need to change up how __dirname is used for ES6 purposes
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+//now please load my static html and css files for my express app, from my /dist directory
+app.use(express.static(path.join(__dirname ,'dist')));
+
+
 // port dynamically assigned by the hosting env so env variable is used
 // it`s part of env in which a process runs
 const port = process.env.PORT || 3000
 
-let mysql = require('mysql');
+
 
 let con = mysql.createConnection({
   host: "localhost",
@@ -33,7 +45,7 @@ app.listen(port, () => {
 app.use(express.json());
 app.use(express.urlencoded({extended:true}));
 
-var session = require('express-session');
+
 
 app.use(session({
 	secret: 'secret',
@@ -100,9 +112,7 @@ app.get("/", (req, res)=>{
 });
 
 app.get("/game", (req, res)=>{
-  res.sendFile(__dirname + "/static/game.html")
-
-  
+  res.sendFile(__dirname + "/static/game.html"); 
 	
 });
 
