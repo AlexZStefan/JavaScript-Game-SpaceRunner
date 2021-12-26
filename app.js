@@ -4,6 +4,7 @@ import mysql from'mysql';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
+
 const app = express();
 
 //we need to change up how __dirname is used for ES6 purposes
@@ -11,12 +12,9 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 //now please load my static html and css files for my express app, from my /dist directory
 app.use(express.static(path.join(__dirname ,'dist')));
 
-
 // port dynamically assigned by the hosting env so env variable is used
 // it`s part of env in which a process runs
 const port = process.env.PORT || 3000
-
-
 
 let con = mysql.createConnection({
   host: "localhost",
@@ -38,14 +36,8 @@ app.listen(port, () => {
   console.log(`Example app listening at http://localhost:${port}`)
 });
 
-
-
-// can replace the app. use by calling this f in the app.post("/", urlencodedParser()
-
 app.use(express.json());
 app.use(express.urlencoded({extended:true}));
-
-
 
 app.use(session({
 	secret: 'secret',
@@ -53,18 +45,21 @@ app.use(session({
 	saveUninitialized: true
 }));
 
-
+let highscore; 
 app.post('/', (request, response)=> {
 	let username = request.body.username;
 	let password = request.body.password;
 
 	if (username  && password) {
      // check database table for existing username
-		con.query(`SELECT * FROM user WHERE name = "${username}" AND password = "${password}" `,  function(error, results, fields) {
-       
+		con.query(`SELECT * FROM user WHERE name = "${username}" AND password = "${password}" `,  (error, results, fields) =>{
+		
       if ((results.length > 0) ) {
 				request.session.loggedin = true;
 				request.session.username = username;
+				request.session.ID = results[0]["ID"];
+				highscore = results[0]["score"];
+				
 				response.redirect('/game');
 			} else {
 				response.send('Incorrect Username and/or Password!');
@@ -74,7 +69,7 @@ app.post('/', (request, response)=> {
 	} else {
 		response.send('Please enter Username and Password!');
 		response.end();
-	}
+	}	
 });
 
 app.post('/signUp', (request, response)=> {
@@ -83,14 +78,16 @@ app.post('/signUp', (request, response)=> {
 
 	if (username  && password) {
     // check database table for existing username
-		con.query(`SELECT * FROM user WHERE name = "${username}" AND password = "${password}" `,  function(error, results, fields) {
+		con.query(`SELECT * FROM user WHERE name = "${username}" AND password = "${password}" `,  (error, results, fields) =>{
       
       // if results is 0 then insert data into database table
       if ((results.length <= 0) ) {
 				request.session.registered = true;
 				request.session.username = username;
+				
+
         // insert data into database table
-        con.query(`INSERT INTO user (name, password, highscore) VALUES ("${username}", "${password}", "0")`);
+        con.query(`INSERT INTO user (name, password, score) VALUES ("${username}", "${password}", "0")`);
 
 				response.redirect('/');
 			} else {
@@ -112,10 +109,30 @@ app.get("/", (req, res)=>{
 });
 
 app.get("/game", (req, res)=>{
-  res.sendFile(__dirname + "/static/game.html"); 
-	
+
+  res.sendFile(__dirname + "/static/game.html");  
+  
+
 });
 
+app.get("/gamescore", (req, res)=>{
+	res.json(highscore);
+});
+
+app.get("/game/:id", (req, res)=>{
+	con.query(`SELECT * FROM user WHERE ID = "${req.session.ID}"`),  (error, results, fields) =>{
+		res.send(results["score"]);  
+		console.log(results[0]);
+	}	
+  });
+  
+  // save highscore into database 
+  // change post to patch or put
+  app.post("/game", async(req, resp)=>{
+	  const data = await req.body;
+	  const gotData = data.categoryChoice
+  })
+ 
 app.get("/signUp", (req, res)=>{
   //res.status(404).sendFile(__dirname + "/public/signUp.html");
   res.sendFile(__dirname + "/static/signUp.html")
@@ -124,5 +141,3 @@ app.get("/signUp", (req, res)=>{
 app.get("*", (req, res)=>{
   res.status(404).sendFile(__dirname + "/404.html")
 });
-
-

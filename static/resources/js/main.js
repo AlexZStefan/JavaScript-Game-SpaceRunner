@@ -17,12 +17,15 @@ import { addListener } from "./audioManager.js";
 import {ParticleSystem} from "./particles.js"
 
 import {playAudio} from "./audioManager.js"
+import { json } from "body-parser";
+import { response } from "express";
+
 
 
 // declare variables 
 let gameScene, gameCamera, gameRenderer, myPlayer, myEvent,
   setGameOver, alertMe, allEnemies, score, playerScore, enemyPool,
-  enemy, playerLives, playerHighScore, gameOver, menu, highscore,
+  enemy, playerLives, playerHighScore, gameOver, menu,
   gameRunning, startButton, gameTerrain, clock, gameLoaded, enemySpawner, coinSpawner,gameInit,loadCamera,loadScene;
 
 // declare functions
@@ -80,8 +83,6 @@ let setGameRunning = () => {
   }
 }
 
-
-
 enemySpawner = new Spawner(gameScene, myPlayer, 0);
 enemySpawner.createEnemyPool().SpawnEnemy();
 coinSpawner = new Spawner(gameScene, myPlayer, 1);
@@ -111,8 +112,34 @@ document.addEventListener('DOMContentLoaded', (e) => {
       if (!gameRunning && !gameOver) {
         if (myPlayer.lives <= 0) {
           gameOver = true;          
-  
-          
+           
+          // send score to backend 
+          saveScore=()=>{
+            let data = {
+              score: myPlayer.score
+            }
+
+            let options = {
+              method: "POST",
+              headers: {
+                "Content-type": "application/json; charset=UTF-8"
+            },
+              body: JSON.stringify(data)
+            }
+
+            const promise = fetch("/data", options);
+            promise.then(response =>{
+              if(!response.ok){
+                console.error(response);
+              }
+              else
+              {
+                return response.json();
+              }
+            }).then(result => {
+              console.log(result);
+            })
+          }
         }
         menu.style.opacity = 1;
       }
@@ -166,8 +193,7 @@ document.addEventListener('DOMContentLoaded', (e) => {
 
 // EVENTS
 setGameOver = new Event('gameOver');
-document.addEventListener('gameOver', alertMe = () => {
-  
+document.addEventListener('gameOver', alertMe = () => {  
 
   startButton.removeEventListener("click", setGameRunning );
   startButton.addEventListener("click", ()=>{location.reload()} );
@@ -180,6 +206,11 @@ playerScore = document.getElementById("score");
 playerHighScore = document.getElementById("highscore");
 playerLives = document.getElementById("playerLives");
 
+fetch('http://localhost:3000/gamescore')
+.then(response => response.json())
+.then(data => {playerHighScore.innerHTML = "Highscore :" + data; 
+});
+
 // Set UI stats
 playerLives.innerHTML = "Lives :" + myPlayer.lives;
 playerScore.innerHTML = "Score :" + myPlayer.score;
@@ -187,6 +218,5 @@ playerHighScore.innerHTML = "Highscore :" + highscore;
 
 startButton = document.getElementById("start");
 startButton.addEventListener("click", setGameRunning);
-
 
 export { animationFrame, setGameRunning, gameLoading };
