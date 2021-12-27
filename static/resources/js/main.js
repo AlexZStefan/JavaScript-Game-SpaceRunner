@@ -17,8 +17,6 @@ import { addListener } from "./audioManager.js";
 import {ParticleSystem} from "./particles.js"
 
 import {playAudio} from "./audioManager.js"
-import { json } from "body-parser";
-import { response } from "express";
 
 
 
@@ -29,7 +27,7 @@ let gameScene, gameCamera, gameRenderer, myPlayer, myEvent,
   gameRunning, startButton, gameTerrain, clock, gameLoaded, enemySpawner, coinSpawner,gameInit,loadCamera,loadScene;
 
 // declare functions
-let initializer, animate, animationFrame, gameLoading;
+let initializer, animate, animationFrame, gameLoading, saveScore;
 
 // BOOLS 
 gameRunning = false;
@@ -97,6 +95,34 @@ setInterval(()=>{
 gameTerrain = new TerrainGen(gameScene, myPlayer);
 gameTerrain.createTerrainPlane();
 
+saveScore=()=>{
+
+  let data = {
+    score: myPlayer.score
+  }
+
+  let options = {
+    method: "PATCH",
+    headers: {
+      "Content-type": "application/json; charset=UTF-8"
+  },
+    body: JSON.stringify(data)
+  }
+
+  const promise = fetch("/game", options);
+  promise.then(response =>{
+    if(!response.ok){
+      console.error(response);
+    }
+    else
+    {
+      return response.json();
+    }
+  }).then(result => {
+    console.log(result);
+  })
+}
+
 // trigger event when dom is loaded and set the splash screen opacity to 0 and starts the game 
 document.addEventListener('DOMContentLoaded', (e) => {
 
@@ -104,8 +130,7 @@ document.addEventListener('DOMContentLoaded', (e) => {
   document.getElementById("splash").style.opacity = 0;
 
   (animate = () => {
-    // set the framerate
-    
+    // set the framerate    
     if (gameLoaded == true) {
      
       // SHOW MENU IF PAUSED
@@ -114,32 +139,7 @@ document.addEventListener('DOMContentLoaded', (e) => {
           gameOver = true;          
            
           // send score to backend 
-          saveScore=()=>{
-            let data = {
-              score: myPlayer.score
-            }
-
-            let options = {
-              method: "POST",
-              headers: {
-                "Content-type": "application/json; charset=UTF-8"
-            },
-              body: JSON.stringify(data)
-            }
-
-            const promise = fetch("/data", options);
-            promise.then(response =>{
-              if(!response.ok){
-                console.error(response);
-              }
-              else
-              {
-                return response.json();
-              }
-            }).then(result => {
-              console.log(result);
-            })
-          }
+          saveScore();
         }
         menu.style.opacity = 1;
       }
@@ -196,8 +196,10 @@ setGameOver = new Event('gameOver');
 document.addEventListener('gameOver', alertMe = () => {  
 
   startButton.removeEventListener("click", setGameRunning );
-  startButton.addEventListener("click", ()=>{location.reload()} );
   startButton.innerHTML = "Restart";
+  startButton.addEventListener("click", ()=>{
+    location.reload()
+  });  
 });
 
 // HTML DOC
@@ -208,13 +210,13 @@ playerLives = document.getElementById("playerLives");
 
 fetch('http://localhost:3000/gamescore')
 .then(response => response.json())
-.then(data => {playerHighScore.innerHTML = "Highscore :" + data; 
+.then(data => {playerHighScore.innerHTML = "Highscore :" + data;
 });
 
 // Set UI stats
 playerLives.innerHTML = "Lives :" + myPlayer.lives;
 playerScore.innerHTML = "Score :" + myPlayer.score;
-playerHighScore.innerHTML = "Highscore :" + highscore;
+//playerHighScore.innerHTML = "Highscore :" + highscore;
 
 startButton = document.getElementById("start");
 startButton.addEventListener("click", setGameRunning);
