@@ -208,10 +208,14 @@ playerScore = document.getElementById("score");
 playerHighScore = document.getElementById("highscore");
 playerLives = document.getElementById("playerLives");
 
+// install cors
+// have to change from localhost to ip if trying to access from ip address
 fetch('http://localhost:3000/gamescore')
 .then(response => response.json())
 .then(data => {playerHighScore.innerHTML = "Highscore :" + data;
 });
+
+
 
 // Set UI stats
 playerLives.innerHTML = "Lives :" + myPlayer.lives;
