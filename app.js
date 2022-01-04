@@ -6,13 +6,12 @@ import { fileURLToPath } from 'url';
 
 const app = express();
 
-//we need to change up how __dirname is used for ES6 purposes
+// had to change up how __dirname is used for ES6 purposes
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-//now please load my static html and css files for my express app, from my /dist directory
 app.use(express.static(path.join(__dirname, 'dist')));
 
 // port dynamically assigned by the hosting env so env variable is used
-// it`s part of env in which a process runs
+// part of env in which a process runs
 const port = process.env.PORT || 3000
 
 let con = mysql.createConnection({
@@ -113,23 +112,19 @@ app.get("/gamescore", (req, res) => {
 	res.json(highscore);
 });
 
-// save highscore into database 
+// save high-score into database 
 app.patch("/game", async (req, resp) => {
 	const data = await req.body;
 	con.query(`
 	  UPDATE user SET score = "${data.score}" WHERE ID ="${req.session.ID}"`);
-	//   const gotData = data.categoryChoice;
-	//   console.log(data.score);
-	//   console.log(req.session.ID);
+
 })
 
 app.get("/signUp", (req, res) => {
-	//res.status(404).sendFile(__dirname + "/public/signUp.html");
 	res.sendFile(__dirname + "/static/signUp.html")
 });
 
 app.get("/aboutUs", (req, res) => {
-	//res.status(404).sendFile(__dirname + "/public/signUp.html");
 	res.sendFile(__dirname + "/static/aboutUs.html")
 });
 
