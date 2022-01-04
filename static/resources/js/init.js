@@ -1,16 +1,13 @@
 import {
-  DirectionalLight, DirectionalLightHelper, GridHelper, Scene,
-  WebGLRenderer, PerspectiveCamera, Group, FontLoader, TextGeometry, BoxGeometry, Mesh, MeshBasicMaterial,Fog
+  DirectionalLight, Scene, WebGLRenderer, PerspectiveCamera, FontLoader, TextGeometry, BoxGeometry, Mesh, MeshBasicMaterial,Fog
 }
   from "https://unpkg.com/three@0.127.0/build/three.module.js";
 
-let init, myWebCanvas, SRC;
+let myWebCanvas;
 
 class GameScreen {
   constructor() {
-
     this.camera = new PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-
     this.gameScene = new Scene();
     this.loadingScene = new Scene();
     this.gameCamera = null;
@@ -25,13 +22,10 @@ class GameScreen {
     this.renderer = new WebGLRenderer();
 
     this.renderer.setSize(window.innerWidth, window.innerHeight);
-
     // find the div element
     myWebCanvas = document.getElementById("webgl")
-    // assigne the renderer to the div element in index.html
-    myWebCanvas.appendChild(this.renderer.domElement);
-
-    // adds the gameLights into the scene
+    // assign the renderer to the div element in index.html
+    myWebCanvas.appendChild(this.renderer.domElement); 
 
     /*
     const GRID_HELPER = new GridHelper(10, 10);
@@ -49,28 +43,21 @@ class GameScreen {
     }
 
     window.addEventListener("resize", onWindowResize, false);
-
     this.loadingScreen();
     this.gameScreen();
   }
 
   gameScreen = () => {
     this.gameCamera = new PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-
     this.gameCamera.position.set(0, 1, 0);
     this.gameCamera.rotation.y = Math.PI;
-
-    // scene renderer camera 
-  };
+   };
 
   loadingScreen() {
     this.loadingCamera = new PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-
     let light = new DirectionalLight(0xfadede, 50);
-
     light.position.set(0, 10, 5);
     this.loadingCamera.position.set(0, 0, 15);
-
     let geometry;
 
     const fontLoader = new FontLoader();

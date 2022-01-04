@@ -129,6 +129,11 @@ app.get("/signUp", (req, res) => {
 	res.sendFile(__dirname + "/static/signUp.html")
 });
 
+app.get("/aboutUs", (req, res) => {
+	//res.status(404).sendFile(__dirname + "/public/signUp.html");
+	res.sendFile(__dirname + "/static/aboutUs.html")
+});
+
 app.get("*", (req, res) => {
 	res.status(404).sendFile(__dirname + "/404.html")
 });

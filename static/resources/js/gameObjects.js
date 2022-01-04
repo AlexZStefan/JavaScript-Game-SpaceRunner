@@ -1,14 +1,13 @@
 import {
-  DirectionalLight, DirectionalLightHelper, AmbientLight, BoxGeometry, ConeGeometry,
-  CylinderGeometry, PlaneGeometry, DoubleSide, BackSide, FrontSide, Mesh,
-  MeshBasicMaterial, MeshStandardMaterial, MeshPhongMaterial, Group, Quaternion, Vector3,
-  Euler, Object3D, TextureLoader, UVMapping, RepeatWrapping, AdditiveBlending, CustomBlending,
-  AddEquation, OneFactor, ZeroFactor, SubtractEquation, AnimationMixer, Clock, LoopOnce
+  DirectionalLight, DirectionalLightHelper, BoxGeometry, ConeGeometry,
+  CylinderGeometry, PlaneGeometry, DoubleSide, BackSide, Mesh,
+  MeshBasicMaterial, MeshPhongMaterial, Quaternion, Vector3,
+  Euler, Object3D, TextureLoader,CustomBlending,
+  AddEquation, OneFactor, AnimationMixer
 }
   from "https://unpkg.com/three@0.127.0/build/three.module.js"
 
 import { Queue } from "./functions.js"
-
 import { FBXModelManager } from "./modelLoader.js"
 import {playAudio} from "./audioManager.js"
 
@@ -39,7 +38,7 @@ export default gameLights = (scene) => {
   dirLight.position.y = 5;
   dirLight.castShadow = true;
   allLights.push(dirLight);
-  allLights.push(helper);
+  //allLights.push(helper);
   allLights.forEach(element => scene.add(element));
 };
 
@@ -97,8 +96,6 @@ class Coin extends Object3D {
     this.texture;
     this.geometry;
     this.mesh;
-    //this.position = {x, y,z};
-    //this.position = new Position();
     this.material;
   }
 
@@ -106,7 +103,6 @@ class Coin extends Object3D {
     this.geometry = new CylinderGeometry(radiusTop, radiusBottom, height, radialSegments, heightSegments);
     this.material = new MeshPhongMaterial({ map: this.texture });
     this.attach(new Mesh(this.geometry, this.material));
-    // rotate the object to face the up position
     this.rotateX(1.62);
     return this;
   }
@@ -134,6 +130,7 @@ class TerrainGen {
     this.queueIn = new Queue();
     this.queueOut = new Queue();
     this.texture = textureLoader.load("/resources/textures/space_floor.jpg");
+   
 
     this.quaternion = new Quaternion();
     this.quaternion.setFromAxisAngle(new Vector3(1, 0, 0), Math.PI / 2);
@@ -148,11 +145,12 @@ class TerrainGen {
       blendDst: OneFactor
  
     });
+    this.cloneMesh = new Mesh(this.terrainPlane, this.terrainMaterial);
   }
 
   createTerrainPlane = () => {
     for (let i = 0; i < 90; i++) {
-      this.thisPlane = new Mesh(this.terrainPlane, this.terrainMaterial);
+      this.thisPlane = this.cloneMesh.clone();
       this.thisPlane.name = "TerrainPlane";
       this.thisPlane.position.z = -50;
       this.thisPlane.applyQuaternion(this.quaternion);
@@ -212,8 +210,7 @@ class Player extends Object3D {
     // weight pain limit 4 / vert
     this.assetLoader = new FBXModelManager(this, 0.005);
 
-    this.assetLoader.loadModels("/resources/3dModels/try2.fbx");
-
+    this.assetLoader.loadModels("/resources/3dModels/player.fbx");
     this.assetLoader.loadAnimation("/resources/3dModels/animations/run.fbx");
     this.assetLoader.loadAnimation("/resources/3dModels/animations/jump.fbx");
 
@@ -285,7 +282,7 @@ class Player extends Object3D {
   update = () => {
     this.score++;
     // increase speed overtime         
-    if (this.score < 10000) this.speed += 0.00005;
+    if (this.score < 10000) this.speed += 0.0003;
     this.position.z += this.speed / 5;
 
     // play and update animations
@@ -306,4 +303,4 @@ gameObjects = (scene) => {
   return allObjects;
 }
 
-export { TerrainGen, Coin, createCylinder, gameObjects, createCube, createCone, Player, skyCube, createPlane, allMaterials }
+export { TerrainGen, Coin, createCylinder, gameObjects, createCube, createCone, Player, skyCube, createPlane, allMaterials, Object3D }

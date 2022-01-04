@@ -1,7 +1,7 @@
-import { AudioListener, AudioLoader, Audio } from "https://unpkg.com/three@0.133.1/build/three.module.js"
+import { AudioListener, AudioLoader, Audio } from "https://unpkg.com/three@0.127.0/build/three.module.js"
 
 //functions
-let addListener, playAudio, allSounds;
+let addListener, playAudio;
 
 //sounds
 let crash, death, jump, gameMusic, collection;
@@ -110,7 +110,7 @@ AUDIOLOADER.load("resources/audio/collect.wav", (buffer) => {
 );
 
 playAudio = (value) => {
-  let sounds = {"crash": crash, "death": death, "jump": jump, "collect": collection, "gameMusic" : gameMusic };
+  let sounds = { "crash": crash, "death": death, "jump": jump, "collect": collection, "gameMusic": gameMusic };
 
   if (sounds[`${value}`].isPlaying) {
     sounds[`${value}`].stop();

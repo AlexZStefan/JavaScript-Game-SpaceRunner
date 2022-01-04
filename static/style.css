@@ -1,12 +1,22 @@
+.aboutUs{
+  position: relative;
+  top: 10px;
+  width: 60%;
+  opacity: 0.8;
+  padding: 100px;
+  background-color: aqua;
+  margin-left: 20%;
+  margin-right: 20%;
+  margin-bottom: 5%;
+  line-height: 4vh;  
+
+}
 .controlls {
   position: absolute;
   z-index: 120;
   top: 80%;
-
   margin-left: 10%; 
-
   opacity: 1;
-
   display: grid;
   width: 80%;
   grid-gap: 400px;  
@@ -100,9 +110,7 @@
   position: absolute;
   z-index: 110;
   top: 115px;
-
   margin-left: 25%; 
-
   opacity: 0;
   background-color: rgba(0, 174, 255, 0.822);
   display: grid;
@@ -125,7 +133,6 @@
 
 .menu2 {
   grid-column:  1;
-
   grid-row: 2;
 }
 

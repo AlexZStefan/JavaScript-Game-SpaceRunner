@@ -1,33 +1,19 @@
-// modify the player input before releasing final vers
-
-// fix when player pauses the spawn enemy
-
-import {  GameScreen } from "./init.js";
-
+import { GameScreen } from "./init.js";
 import playerControlls from "./playerInput.js";
-
-import gameLights, { TerrainGen, Player, createCube, gameObjects, skyCube } from "./gameObjects.js";
-
-import { addEnemies, createEnemyPool, Spawner } from "./createEnemy.js";
-import { Queue, onCollision } from "./functions.js";
-
+import gameLights, { TerrainGen, Player, gameObjects, skyCube } from "./gameObjects.js";
+import { Spawner } from "./createEnemy.js";
+import { onCollision } from "./functions.js";
 import { addListener } from "./audioManager.js";
-
-
-import {ParticleSystem} from "./particles.js"
-
-import {playAudio} from "./audioManager.js"
-
-
+import { ParticleSystem } from "./particles.js"
+import { playAudio } from "./audioManager.js"
 
 // declare variables 
-let gameScene, gameCamera, gameRenderer, myPlayer, myEvent,
-  setGameOver, alertMe, allEnemies, score, playerScore, enemyPool,
-  enemy, playerLives, playerHighScore, gameOver, menu,
-  gameRunning, startButton, gameTerrain, clock, gameLoaded, enemySpawner, coinSpawner,gameInit,loadCamera,loadScene;
+let gameScene, gameCamera, gameRenderer, myPlayer, 
+  setGameOver, playerScore, playerLives, playerHighScore, gameOver, menu,
+  gameRunning, startButton, gameTerrain, gameLoaded, enemySpawner, coinSpawner, gameInit, loadCamera, loadScene;
 
 // declare functions
-let initializer, animate, animationFrame, gameLoading, saveScore;
+let animate, animationFrame, gameLoading, saveScore, alertMe;
 
 // BOOLS 
 gameRunning = false;
@@ -52,12 +38,11 @@ playerControlls(myPlayer);
 
 // called when models are loaded. find in modelLoader.js
 gameLoading = () => {
-  gameLoaded = true;  
-  
+  gameLoaded = true;
 }
 
 let PS = new ParticleSystem(gameScene, myPlayer);
-PS.createPS(0,0,60);
+PS.createPS(0, 0, 60);
 
 // ADD OBJECTS TO SCENE
 // scene background 
@@ -88,14 +73,14 @@ coinSpawner.createEnemyPool().SpawnEnemy();
 
 // timer 
 let c = 0;
-setInterval(()=>{
-  c++; 
-},100)
+setInterval(() => {
+  c++;
+}, 100)
 
 gameTerrain = new TerrainGen(gameScene, myPlayer);
 gameTerrain.createTerrainPlane();
 
-saveScore=()=>{
+saveScore = () => {
 
   let data = {
     score: myPlayer.score
@@ -105,17 +90,16 @@ saveScore=()=>{
     method: "PATCH",
     headers: {
       "Content-type": "application/json; charset=UTF-8"
-  },
+    },
     body: JSON.stringify(data)
   }
 
   const promise = fetch("/game", options);
-  promise.then(response =>{
-    if(!response.ok){
+  promise.then(response => {
+    if (!response.ok) {
       console.error(response);
     }
-    else
-    {
+    else {
       return response.json();
     }
   }).then(result => {
@@ -132,31 +116,30 @@ document.addEventListener('DOMContentLoaded', (e) => {
   (animate = () => {
     // set the framerate    
     if (gameLoaded == true) {
-     
+
       // SHOW MENU IF PAUSED
       if (!gameRunning && !gameOver) {
         if (myPlayer.lives <= 0) {
-          gameOver = true;          
-           
+          gameOver = true;
+
           // send score to backend 
           saveScore();
         }
         menu.style.opacity = 1;
       }
-      // Once player lost all lives - trigger GameOver Event.
+      // Game Over event.
       if (!gameRunning && gameOver) {
         menu.children[0].innerHTML = "GameOver";
         document.dispatchEvent(setGameOver);
       }
 
-      // stops the renderer if gameRunning = false
-      // MAIN LOOP STARTS HERE 
-      if (gameRunning) {
+      // Main gameLoop 
+      if (gameRunning && !gameOver) {
         // hide the menu 
         menu.style.opacity = 0;
 
-      PS.update();
-     
+        PS.update();
+
         // set UI player score
         playerScore.innerHTML = "Score :" + myPlayer.score;
 
@@ -164,8 +147,7 @@ document.addEventListener('DOMContentLoaded', (e) => {
         gameCamera.position.y = myPlayer.position.y + 2;
 
         // create terrain chunk function in gameObjects
-        gameTerrain.generateTerrain();
-        //generateTerrain(gameScene, myPlayer, terrainPlanesQueue, terrainPlanesQueueOut);
+        gameTerrain.generateTerrain();  
 
         // Collision detection on each enemy       
         enemySpawner.pool.allElements().forEach(enemy => onCollision(myPlayer, enemy));
@@ -174,32 +156,32 @@ document.addEventListener('DOMContentLoaded', (e) => {
         coinSpawner.pool.allElements().forEach(coin => onCollision(myPlayer, coin));
 
         myPlayer.update();
+        console.log(myPlayer.speed);
 
-          gameRenderer.render(gameScene, gameCamera);
+        gameRenderer.render(gameScene, gameCamera);
       }
     }
-    else
-    {
+    else {
       gameInit.loadingScreenUpdate();
-         gameRenderer.render(loadScene, loadCamera);
-    }       
-        
+      gameRenderer.render(loadScene, loadCamera);
+    }
+
     setTimeout(() => {
       animationFrame = requestAnimationFrame(animate);
     }
       , 1000 / 60); // frame limit 
-  })(); 
+  })();
 });
 
 // EVENTS
 setGameOver = new Event('gameOver');
-document.addEventListener('gameOver', alertMe = () => {  
+document.addEventListener('gameOver', alertMe = () => {
 
-  startButton.removeEventListener("click", setGameRunning );
-  startButton.innerHTML = "Restart";
-  startButton.addEventListener("click", ()=>{
-    location.reload()
-  });  
+  startButton.removeEventListener("click", setGameRunning);
+  startButton.innerHTML = "MainPage";
+  startButton.addEventListener("click", () => {
+    location.replace("/");
+  });
 });
 
 // HTML DOC
@@ -208,19 +190,16 @@ playerScore = document.getElementById("score");
 playerHighScore = document.getElementById("highscore");
 playerLives = document.getElementById("playerLives");
 
-// install cors
-// have to change from localhost to ip if trying to access from ip address
+// Required cors installation to change from localhost onto ip address - update this if needed to do so. 
 fetch('http://localhost:3000/gamescore')
-.then(response => response.json())
-.then(data => {playerHighScore.innerHTML = "Highscore :" + data;
-});
-
-
+  .then(response => response.json())
+  .then(data => {
+    playerHighScore.innerHTML = "Highscore :" + data;
+  });
 
 // Set UI stats
 playerLives.innerHTML = "Lives :" + myPlayer.lives;
 playerScore.innerHTML = "Score :" + myPlayer.score;
-//playerHighScore.innerHTML = "Highscore :" + highscore;
 
 startButton = document.getElementById("start");
 startButton.addEventListener("click", setGameRunning);

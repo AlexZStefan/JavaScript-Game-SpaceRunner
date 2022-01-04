@@ -1,19 +1,7 @@
-import { createCube, Coin, createCylinder } from "./gameObjects.js"
-import { Group, Vector3, Object3D, InstancedMesh, MeshBasicMaterial } from "https://unpkg.com/three@0.127.0/build/three.module.js"
+import { createCube, Coin, Object3D } from "./gameObjects.js"
+import Queue from "./functions.js"
 
-import Queue, { getDistance } from "./functions.js"
-
-let addEnemies, instantiateEnemies, createEnemyPool, enemySpawner, allEnemies;
-
-// create enemy at player position
-// depends on addEnemies input
-// function will be deleted 
-export default instantiateEnemies = (player, array) => {
-  let enemy = createCube(1, 1, 1, 0xfe1100);
-  array.push(enemy);
-}
-
-let coinInstance = new Coin(0, 0, -50).loadTexture("./resources/textures/coin.png").createCylinder(0.5, 0.5, 0.1, 9, 1);
+let addEnemies,  createEnemyPool, enemySpawner;
 
 class Spawner {
   constructor(scene, player, type) {
@@ -21,27 +9,31 @@ class Spawner {
     this.scene = scene;
     this.type = type;
     this.pool = new Queue();
+    this.cloneEnemy = createCube(1, 1, 1, 0x190100);
+
   }
 
-  // Enemy Queue Pool - however can be used for collectables
+  // Enemy Queue Pool - also reused for collectables
   createEnemyPool() {    
     if (this.pool.getLength() < 29) {
       for (let i = 0; i < 30; i++) {
         switch (this.type) {
+          // enemy pool
           case 0:
-            let enemy = createCube(1, 1, 1, 0x190100);
+            let enemy = this.cloneEnemy.clone();
+            enemy.userData = this.cloneEnemy.userData;
             enemy.position.set(5, 0, -5);
             enemy.name = "Enemy";
             this.pool.enqueue(enemy);
             break;
+          // coin pool
           case 1:
             this.pool.name = "CoinSpawner";
-            let coin = new Coin();
-   
+
+            let coin = new Coin();   
             coin.position.set(0,0,0);
             coin.loadTexture("./resources/textures/coin.png");
             coin.createCylinder(0.5, 0.5, 0.1, 9, 1);
-
             coin.name = "Coin";
             
             this.pool.enqueue(coin);
@@ -65,8 +57,8 @@ class Spawner {
     let spawn = true;
     let firstEnemy;
 
-      if (spawn) {
-        // pool is defined in "main.js" 
+      if (spawn) {      
+        // add elements to the scene at -50 position so it is not shown on the player screen
         if (!this.pool.isEmpty()) {
           if(this.pool.allElements().forEach((element) =>{
             if(element.parent != this.scene) 
@@ -78,7 +70,8 @@ class Spawner {
       
           let xPos =  this.player.position.x;
           let randomX = (Math.floor(Math.random() * 3) - 1) * xPos;
-
+          
+          // set element to random position, ahead of the player
           firstEnemy = this.pool.dequeue(); 
           firstEnemy.position.set(randomX, 0.5,  this.player.position.z + 15 + Math.floor(Math.random() * 3));    
           firstEnemy.visible = true;      
@@ -99,6 +92,5 @@ class Spawner {
       }, 750);      
   }
 }
-
 
 export { addEnemies, enemySpawner, createEnemyPool, Spawner };

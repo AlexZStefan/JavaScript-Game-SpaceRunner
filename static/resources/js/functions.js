@@ -1,9 +1,4 @@
 import { playAudio } from "./audioManager.js"
-
-import { Vector3 } from "https://unpkg.com/three@0.133.1/build/three.module.js"
-
-import { createPlane, allMaterials } from "./gameObjects.js"
-
 import { setGameRunning } from "./main.js"
 
 //variables
