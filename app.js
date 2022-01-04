@@ -4,7 +4,6 @@ import mysql from 'mysql';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
-
 const app = express();
 
 //we need to change up how __dirname is used for ES6 purposes

@@ -2,14 +2,14 @@ import {
   DirectionalLight, DirectionalLightHelper, BoxGeometry, ConeGeometry,
   CylinderGeometry, PlaneGeometry, DoubleSide, BackSide, Mesh,
   MeshBasicMaterial, MeshPhongMaterial, Quaternion, Vector3,
-  Euler, Object3D, TextureLoader,CustomBlending,
+  Euler, Object3D, TextureLoader, CustomBlending,
   AddEquation, OneFactor, AnimationMixer
 }
   from "https://unpkg.com/three@0.127.0/build/three.module.js"
 
 import { Queue } from "./functions.js"
 import { FBXModelManager } from "./modelLoader.js"
-import {playAudio} from "./audioManager.js"
+import { playAudio } from "./audioManager.js"
 
 // functions
 let skyCube, allMaterials, gameLights, createCube, createCone, createPlane,
@@ -130,7 +130,7 @@ class TerrainGen {
     this.queueIn = new Queue();
     this.queueOut = new Queue();
     this.texture = textureLoader.load("/resources/textures/space_floor.jpg");
-   
+
 
     this.quaternion = new Quaternion();
     this.quaternion.setFromAxisAngle(new Vector3(1, 0, 0), Math.PI / 2);
@@ -143,7 +143,7 @@ class TerrainGen {
       blendEquaction: AddEquation,
       blendSrc: OneFactor,
       blendDst: OneFactor
- 
+
     });
     this.cloneMesh = new Mesh(this.terrainPlane, this.terrainMaterial);
   }
@@ -204,7 +204,7 @@ class Player extends Object3D {
   }
 
   init() {
-     
+
     this.position.set(0, 0, 0);
 
     // weight pain limit 4 / vert
@@ -235,7 +235,7 @@ class Player extends Object3D {
       const run = this.mixer.clipAction(this.animations[1]);
       this.mixer.stopAllAction();
       run.play();
-    
+
     }
   }
 
@@ -276,7 +276,7 @@ class Player extends Object3D {
       }, 30);
 
       // decrease the y position
-    }  
+    }
   }
 
   update = () => {

@@ -1,4 +1,4 @@
-import {setGameRunning } from "./main.js"
+import { setGameRunning } from "./main.js"
 
 let playerControlls, renderFrame;
 renderFrame = true;

@@ -8,7 +8,7 @@ import { ParticleSystem } from "./particles.js"
 import { playAudio } from "./audioManager.js"
 
 // declare variables 
-let gameScene, gameCamera, gameRenderer, myPlayer, 
+let gameScene, gameCamera, gameRenderer, myPlayer,
   setGameOver, playerScore, playerLives, playerHighScore, gameOver, menu,
   gameRunning, startButton, gameTerrain, gameLoaded, enemySpawner, coinSpawner, gameInit, loadCamera, loadScene;
 
@@ -147,7 +147,7 @@ document.addEventListener('DOMContentLoaded', (e) => {
         gameCamera.position.y = myPlayer.position.y + 2;
 
         // create terrain chunk function in gameObjects
-        gameTerrain.generateTerrain();  
+        gameTerrain.generateTerrain();
 
         // Collision detection on each enemy       
         enemySpawner.pool.allElements().forEach(enemy => onCollision(myPlayer, enemy));

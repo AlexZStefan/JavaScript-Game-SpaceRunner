@@ -67,17 +67,17 @@ class ParticleSystem {
     for (var p = 0; p < this.particleCount; p++) {
 
       // create a particle with random position
-      const x = Math.random() *100-50;
-      const y = Math.random() *100 - 50;
-      const z = Math.random() *50-50;
+      const x = Math.random() * 100 - 50;
+      const y = Math.random() * 100 - 50;
+      const z = Math.random() * 50 - 50;
 
       this.positions.push(x, y, z);
       color.setHSL(p / this.particleCount, 1.0, 0.8);
       this.colors.push(color.r, color.g, color.b);
-      this.sizes.push(1);       
+      this.sizes.push(1);
     }
 
-    this.particles.setAttribute('position', new THREE.Float32BufferAttribute(this.positions, 3));   
+    this.particles.setAttribute('position', new THREE.Float32BufferAttribute(this.positions, 3));
     this.particles.setAttribute('color', new THREE.Float32BufferAttribute(this.colors, 3));
     this.particles.setAttribute('size', new THREE.Float32BufferAttribute(this.sizes, 1).setUsage(THREE.DynamicDrawUsage));
   }
@@ -92,9 +92,9 @@ class ParticleSystem {
   update() {
     let time = Date.now() * 0.5;
     this.particleSys.rotation.z = 0.001 * time;
-   // this.particleSys.position.z += 0.05;
+    // this.particleSys.position.z += 0.05;
 
-    this.particleSys.position.set(0,0, this.player.position.z +60);
+    this.particleSys.position.set(0, 0, this.player.position.z + 60);
     //this.particleSys.rotation.x = 0.001 * time;
 
     this.sizes = this.particles.attributes.size.array;
@@ -108,11 +108,11 @@ class ParticleSystem {
 
     setInterval(() => {
       c++;
-      for (let i = 0; i < this.particleCount; i+=2) {
-        this.sizes[i] =  (1 + Math.sin(0.1 * c + time));
+      for (let i = 0; i < this.particleCount; i += 2) {
+        this.sizes[i] = (1 + Math.sin(0.1 * c + time));
         //this.colors[i].setHSL(i / this.particleCount, 1.0, 1.0);
-        i+=1; 
-         this.sizes[i] =  (1 - Math.sin(0.1 * c + time));
+        i += 1;
+        this.sizes[i] = (1 - Math.sin(0.1 * c + time));
       }
     }, 10)
 

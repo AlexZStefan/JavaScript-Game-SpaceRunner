@@ -1,5 +1,5 @@
 import {
-  DirectionalLight, Scene, WebGLRenderer, PerspectiveCamera, FontLoader, TextGeometry, BoxGeometry, Mesh, MeshBasicMaterial,Fog
+  DirectionalLight, Scene, WebGLRenderer, PerspectiveCamera, FontLoader, TextGeometry, BoxGeometry, Mesh, MeshBasicMaterial, Fog
 }
   from "https://unpkg.com/three@0.127.0/build/three.module.js";
 
@@ -17,15 +17,15 @@ class GameScreen {
   }
 
   init() {
-    this.gameScene.fog = new Fog( 0xCFE7E8,7,20);
-    
+    this.gameScene.fog = new Fog(0xCFE7E8, 7, 20);
+
     this.renderer = new WebGLRenderer();
 
     this.renderer.setSize(window.innerWidth, window.innerHeight);
     // find the div element
     myWebCanvas = document.getElementById("webgl")
     // assign the renderer to the div element in index.html
-    myWebCanvas.appendChild(this.renderer.domElement); 
+    myWebCanvas.appendChild(this.renderer.domElement);
 
     /*
     const GRID_HELPER = new GridHelper(10, 10);
@@ -51,7 +51,7 @@ class GameScreen {
     this.gameCamera = new PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
     this.gameCamera.position.set(0, 1, 0);
     this.gameCamera.rotation.y = Math.PI;
-   };
+  };
 
   loadingScreen() {
     this.loadingCamera = new PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
@@ -78,7 +78,7 @@ class GameScreen {
     const mat = new MeshBasicMaterial({ color: 0x00ff00 });
 
     let boxG = new BoxGeometry(1, 1, 1);
-    this. box = new Mesh(boxG, mat);
+    this.box = new Mesh(boxG, mat);
     this.box.position.set(0, 0, 5);
 
     const mesh = new Mesh(geometry, mat);
@@ -90,8 +90,8 @@ class GameScreen {
     this.loadingScene.add(this.box);
   }
 
-  loadingScreenUpdate(){
-   
+  loadingScreenUpdate() {
+
     this.box.rotation.x += 0.05;
     this.box.rotation.y += 0.05;
   }
